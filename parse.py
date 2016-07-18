@@ -10,10 +10,10 @@ import pandas as pd
 
 # define coszenith bins
 nbins = 20
-cos_binlims = np.linspace(-1.0, 1.0, nbins + 1)
+cos_zen_binlims = np.linspace(-1.0, 1.0, nbins + 1)
 coszen_binsize = 2.0/nbins
-coszen_low = cos_binlims[:-1]
-coszen_hi = cos_binlims[1:]
+coszen_low = cos_zen_binlims[:-1]
+coszen_hi = cos_zen_binlims[1:]
 cos_zen = coszen_low + 0.5 * coszen_binsize
 bins = np.column_stack((coszen_low, coszen_hi))
 
@@ -36,6 +36,12 @@ numubar = df['NuMubar'].unstack().values
 nue = df['NuE'].unstack().values
 nuebar = df['NuEbar'].unstack().values
 
-#rec = df.to_records()
-#h5 = h5py.File('honda2015_frejus_solarmin.h5')
-#h5.create_dataset('raw_parsed', data=rec)
+h5 = h5py.File('honda2015_frejus_solarmin.h5')
+h5.create_dataset('energy', data=energy, compression="gzip", compression_opts=5)
+h5.create_dataset('cos_zen', data=cos_zen, compression="gzip", compression_opts=5)
+h5.create_dataset('cos_zen_binlims', data=cos_zen_binlims, compression="gzip", compression_opts=5)
+h5.create_dataset('nu_mu', data=numu, compression="gzip", compression_opts=5)
+h5.create_dataset('nu_mu_bar', data=numubar, compression="gzip", compression_opts=5)
+h5.create_dataset('nu_e', data=nue, compression="gzip", compression_opts=5)
+h5.create_dataset('nu_e_bar', data=nuebar, compression="gzip", compression_opts=5)
+h5.close()
