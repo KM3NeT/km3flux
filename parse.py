@@ -28,6 +28,13 @@ for lo, hi in bins:
 
 df = pd.concat(dfs)
 energy = np.unique(df['Enu'])
+en_low_log = np.log10(energy) - 0.025
+en_high_log = np.log10(energy) + 0.025
+en_low = np.power(10, en_low_log)
+en_high = np.power(10, en_high_log)
+en_binlims = np.ones(energy.shape[0] + 1)
+en_binlims[:-1] = en_low
+en_binlims[-1] = en_high[-1]
 df = df.set_index(['cos_zen', 'Enu'])
 
 # (Energy, cos) matrices
@@ -38,6 +45,7 @@ nuebar = df['NuEbar'].unstack().values
 
 h5 = h5py.File('honda2015_frejus_solarmin.h5')
 h5.create_dataset('energy', data=energy, compression="gzip", compression_opts=5)
+h5.create_dataset('energy_binlims', data=en_binlims, compression="gzip", compression_opts=5)
 h5.create_dataset('cos_zen', data=cos_zen, compression="gzip", compression_opts=5)
 h5.create_dataset('cos_zen_binlims', data=cos_zen_binlims, compression="gzip", compression_opts=5)
 h5.create_dataset('nu_mu', data=numu, compression="gzip", compression_opts=5)
