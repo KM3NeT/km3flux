@@ -29,7 +29,6 @@ class HondaFlux(object):
         # adjust upper bin for the case zenith==0
         self.cos_zen_bins[-1] += 0.00001
 
-
     def __call__(self, flavor, zenith, energy):
         fluxtable = self.tables[flavor]
         cos_zen = np.cos(zenith)
@@ -38,3 +37,11 @@ class HondaFlux(object):
         ene_bin = ene_bin - 1
         zen_bin = zen_bin - 1
         return fluxtable[zen_bin, ene_bin]
+
+    def from_dataframe(self, df):
+        flux = np.ones_like(df['zenith'], dtype=float)
+        for flavor in df['flavor'].unique():
+            where = df['flavor'] == flavor
+            flux[where] = self(flavor, df['zenith'][where],
+                               df['energy'][where])
+        return flux
