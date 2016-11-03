@@ -1,13 +1,17 @@
+import os.path
+
 import h5py
 import numpy as np
+
+import honda_2015
 
 
 class HondaFlux(object):
     """
     Get Honda 2015 atmospheric neutrino fluxes.
 
-    >>> from honda_flux import HondaFlux
-    >>> flux = HondaFlux('file_with_fluxtables.h5')
+    >>> from honda_2015 import HondaFlux
+    >>> flux = HondaFlux()
 
     >>> zen = np.linspace(0, np.pi, 11)
     >>> ene = np.logspace(0, 2, 11)
@@ -19,8 +23,10 @@ class HondaFlux(object):
          6.87310000e-05,   1.42550000e-05])
 
     """
-    def __init__(self, filename):
+    def __init__(self, filename=None):
         self.tables = {}
+        if filename is None:
+            filename = os.path.dirname(honda_2015.__file__) + '/data/honda2015_frejus_solarmin.h5'
         with h5py.File(filename, 'r') as h5:
             self.energy_bins = h5['energy_binlims'][:]
             self.cos_zen_bins = h5['cos_zen_binlims'][:]
