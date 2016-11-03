@@ -12,4 +12,10 @@ setup(
     author_email='mlotze@km3net.de',
     license='MIT',
     packages=['honda_2015', ],
+    install_requires=[
+        'numpy',
+        'scipy',
+        'h5py',
+        'docopt',
+    ]
 )
