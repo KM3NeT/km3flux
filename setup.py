@@ -12,6 +12,7 @@ setup(
     author_email='mlotze@km3net.de',
     license='MIT',
     packages=['honda_2015', ],
+    include_package_data=True,
     install_requires=[
         'numpy',
         'scipy',

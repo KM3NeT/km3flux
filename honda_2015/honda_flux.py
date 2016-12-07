@@ -5,6 +5,9 @@ import numpy as np
 
 import honda_2015
 
+DATADIR = os.path.dirname(honda_2015.__file__)
+FLUXFILE = DATADIR + '/data/honda2015_frejus_solarmin.h5'
+
 
 class HondaFlux(object):
     """
@@ -26,7 +29,7 @@ class HondaFlux(object):
     def __init__(self, filename=None):
         self.tables = {}
         if filename is None:
-            filename = os.path.dirname(honda_2015.__file__) + '/data/honda2015_frejus_solarmin.h5'
+            filename = FLUXFILE
         with h5py.File(filename, 'r') as h5:
             self.energy_bins = h5['energy_binlims'][:]
             self.cos_zen_bins = h5['cos_zen_binlims'][:]
@@ -35,7 +38,7 @@ class HondaFlux(object):
         # adjust upper bin for the case zenith==0
         self.cos_zen_bins[-1] += 0.00001
 
-    def __call__(self, flavor, zenith, energy):
+    def binned(self, flavor, zenith, energy):
         fluxtable = self.tables[flavor]
         cos_zen = np.cos(zenith)
         ene_bin = np.digitize(energy, self.energy_bins)
@@ -43,6 +46,10 @@ class HondaFlux(object):
         ene_bin = ene_bin - 1
         zen_bin = zen_bin - 1
         return fluxtable[zen_bin, ene_bin]
+
+    def __call__(self, method='binned', *args):
+        if method == 'binned':
+            return self(*args)
 
     def from_dataframe(self, df):
         flux = np.ones_like(df['zenith'], dtype=float)
