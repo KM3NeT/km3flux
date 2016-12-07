@@ -47,10 +47,6 @@ class HondaFlux(object):
         zen_bin = zen_bin - 1
         return fluxtable[zen_bin, ene_bin]
 
-    def __call__(self, method='binned', *args):
-        if method == 'binned':
-            return self(*args)
-
     def from_dataframe(self, df):
         flux = np.ones_like(df['zenith'], dtype=float)
         for flavor in df['flavor'].unique():
