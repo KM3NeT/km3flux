@@ -33,7 +33,7 @@ class HondaFlux(object):
         with h5py.File(filename, 'r') as h5:
             self.energy_bins = h5['energy_binlims'][:]
             self.cos_zen_bins = h5['cos_zen_binlims'][:]
-            for flavor in ('nu_e', 'nu_e_bar', 'nu_mu', 'nu_mu_bar'):
+            for flavor in ('nu_e', 'anu_e', 'nu_mu', 'anu_mu'):
                 self.tables[flavor] = h5[flavor][:]
         # adjust upper bin for the case zenith==0
         self.cos_zen_bins[-1] += 0.00001
