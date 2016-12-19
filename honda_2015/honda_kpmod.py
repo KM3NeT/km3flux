@@ -11,7 +11,12 @@ class HondaMod(Module):
         self.honda = HondaFlux()
 
     def process(self, blob):
+        if 'McNu' not in blob:
+            return blob
+        if not blob['McNu']['is_neutrino']:
+            return blob
         zen = blob['McNu']['zenith']
         ene = blob['McNu']['energy']
         flav = blob['McNu']['flavor']
         blob['Honda2015'] = self.honda(flav, zen, ene)
+        return blob
