@@ -8,8 +8,8 @@ Currently only Azimmuth-averaged.
 
 Frejus-Solarminimum is my personal favorite (close to ORCA).
 
-Unfortunately, the filenames of the per-zenith-split tables
-have to be generated manually so far.
+Unfortunately, if you want a different earthlocation/non-azimuth-averaged tables, the per-zenith-split tables
+have to be generated manually at the moment.
 
 ## Units
 
