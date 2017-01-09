@@ -1,9 +1,12 @@
-import pandas as pd
-import numpy as np
+import pandas as pd     # noqa
 
-import honda_2015
+from honda_2015 import HondaFlux
 
 
-def honda_df(flavor, df):
+def honda_df(df):
+    df['honda2015'] = 0
     hf = HondaFlux()
-    return hf.binned(flavor, df['zenith'], df['energy'])
+    for flav in {'nu_mu', 'anu_mu', 'nu_e', 'anu_e'}:       # noqa
+        mask = df.flavor == flav
+        df.loc[mask, 'honda2015'] = hf.binned(flav, df.zenith[mask], df.energy[mask])
+    return df
