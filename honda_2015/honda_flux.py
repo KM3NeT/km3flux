@@ -28,6 +28,7 @@ class HondaFlux(object):
     """
     def __init__(self, filename=None):
         self.tables = {}
+        self.avtables = {}
         if filename is None:
             filename = FLUXFILE
         with h5py.File(filename, 'r') as h5:
@@ -35,10 +36,23 @@ class HondaFlux(object):
             self.cos_zen_bins = h5['cos_zen_binlims'][:]
             for flavor in ('nu_e', 'anu_e', 'nu_mu', 'anu_mu'):
                 self.tables[flavor] = h5[flavor][:]
+                self.avtables[flavor] = h5['averaged/' + flavor][:]
         # adjust upper bin for the case zenith==0
         self.cos_zen_bins[-1] += 0.00001
 
-    def binned(self, flavor, zenith, energy):
+    def get(self, flavor, energy, zenith=None):
+        if zenith is None:
+            return self._averaged(flavor, energy)
+        else:
+            return self._with_zenith(flavor, energy=energy, zenith=zenith)
+
+    def _averaged(self, flavor, energy):
+        fluxtable = self.avtables[flavor]
+        ene_bin = np.digitize(energy, self.energy_bins)
+        ene_bin = ene_bin - 1
+        return fluxtable[ene_bin]
+
+    def _with_zenith(self, flavor, energy, zenith):
         fluxtable = self.tables[flavor]
         cos_zen = np.cos(zenith)
         ene_bin = np.digitize(energy, self.energy_bins)
