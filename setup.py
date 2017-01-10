@@ -5,7 +5,7 @@ from setuptools import setup
 
 setup(
     name='honda_2015',
-    version='0.2',
+    version='0.4',
     description='Atmospheric Neutrino Fluxes',
     url='http://git.km3net.de/moritz/honda_2015',
     author='Moritz Lotze',
