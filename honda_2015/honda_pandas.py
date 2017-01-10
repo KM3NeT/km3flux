@@ -12,5 +12,5 @@ def honda_df(df, average=True):
             zen = None
         else:
             zen = df.zenith[mask]
-        df.loc[mask, 'honda2015'] = hf.binned(flav, df.energy[mask], zen)
+        df.loc[mask, 'honda2015'] = hf.get(flav, df.energy[mask], zen)
     return df
