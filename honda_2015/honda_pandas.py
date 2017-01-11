@@ -16,7 +16,7 @@ def honda_df(df, average=True):
     return df
 
 
-def honda_sarcevic(df):
+def honda_sarcevic_df(df):
     df['honda_sarcevic'] = 0
     hf = HondaFlux()
     for flav in {'nu_mu', 'anu_mu', 'nu_e', 'anu_e'}:       # noqa
