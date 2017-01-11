@@ -1,5 +1,5 @@
 from km3pipe import Module
-from honda_2015 import HondaFlux
+from honda_2015 import HondaFlux, HondaSarcevic
 
 
 class HondaMod(Module):
@@ -21,5 +21,23 @@ class HondaMod(Module):
             zen = None
         else:
             zen = blob[self.key]['zenith']
+        blob['Honda2015'] = self.honda.get(flav, ene, zen)
+        return blob
+
+
+class HondaSarcevicMod(Module):
+    """Get the Honda Sarcevic fluxes.
+    """
+    def __init__(self, **context):
+        super(self.__class__, self).__init__(**context)
+        self.key = self.require('key')
+        self.honda = HondaSarcevic()
+
+    def process(self, blob):
+        if self.key not in blob:
+            return blob
+        flav = blob[self.key]['flavor']
+        ene = blob[self.key]['energy']
+        zen = blob[self.key]['zenith']
         blob['Honda2015'] = self.honda.get(flav, ene, zen)
         return blob

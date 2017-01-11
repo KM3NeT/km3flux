@@ -61,10 +61,32 @@ class HondaFlux(object):
         zen_bin = zen_bin - 1
         return fluxtable[zen_bin, ene_bin]
 
-    def from_dataframe(self, df):
-        flux = np.ones_like(df['zenith'], dtype=float)
-        for flavor in df['flavor'].unique():
-            where = df['flavor'] == flavor
-            flux[where] = self(flavor, df['zenith'][where],
-                               df['energy'][where])
-        return flux
+
+class HondaSarcevic(object):
+    """
+    Get Honda + Sarcevic atmospheric neutrino fluxes.
+    """
+    def __init__(self, filename=None):
+        self.tables = {}
+        self.avtables = {}
+        if filename is None:
+            filename = FLUXFILE
+        with h5py.File(filename, 'r') as h5:
+            self.energy_bins = h5['energy_binlims'][:]
+            self.cos_zen_bins = h5['cos_zen_binlims'][:]
+            for flavor in ('nu_e', 'anu_e', 'nu_mu', 'anu_mu'):
+                self.tables[flavor] = h5['honda_sarcevic/' + flavor][:]
+        # adjust upper bin for the case zenith==0
+        self.cos_zen_bins[-1] += 0.00001
+
+    def get(self, flavor, energy, zenith):
+        return self._with_zenith(flavor, energy=energy, zenith=zenith)
+
+    def _with_zenith(self, flavor, energy, zenith):
+        fluxtable = self.tables[flavor]
+        cos_zen = np.cos(zenith)
+        ene_bin = np.digitize(energy, self.energy_bins)
+        zen_bin = np.digitize(cos_zen, self.cos_zen_bins)
+        ene_bin = ene_bin - 1
+        zen_bin = zen_bin - 1
+        return fluxtable[zen_bin, ene_bin]
