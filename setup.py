@@ -4,14 +4,14 @@
 from setuptools import setup
 
 setup(
-    name='honda_2015',
-    version='0.5',
+    name='km3flux',
+    version='0.6',
     description='Atmospheric Neutrino Fluxes',
-    url='http://git.km3net.de/moritz/honda_2015',
+    url='http://git.km3net.de/moritz/km3flux',
     author='Moritz Lotze',
     author_email='mlotze@km3net.de',
     license='MIT',
-    packages=['honda_2015', ],
+    packages=['km3flux', ],
     include_package_data=True,
     install_requires=[
         'numpy',

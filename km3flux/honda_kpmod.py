@@ -1,5 +1,5 @@
 from km3pipe import Module
-from honda_2015 import HondaFlux, HondaSarcevic
+from km3flux import HondaFlux, HondaSarcevic
 
 
 class HondaMod(Module):

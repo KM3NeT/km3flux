@@ -1,7 +1,7 @@
 import pandas as pd     # noqa
 import numpy as np
 
-from honda_2015 import HondaFlux, HondaSarcevic
+from km3flux import HondaFlux, HondaSarcevic
 
 
 def honda_df(df, nevts=None, average=True, flavors=None):

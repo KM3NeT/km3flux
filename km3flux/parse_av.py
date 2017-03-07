@@ -8,7 +8,7 @@ import h5py
 import numpy as np
 import pandas as pd
 
-prefix = '/home/mlotze/pkg/honda_2015/honda_2015/data'
+prefix = '/home/mlotze/pkg/km3flux/km3flux/data'
 fname = prefix + '/' + 'all.csv'
 df = pd.read_table(fname, header=0, delim_whitespace=True)
 n_evts = len(df)

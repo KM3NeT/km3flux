@@ -1,13 +1,13 @@
-"""Honda 2015 Fluxes, in  (m^2 sec sr GeV)^-1"""
+"""Honda 2015/Honda Sarcevic Fluxes, in  (m^2 sec sr GeV)^-1"""
 
 import os.path
 
 import h5py
 import numpy as np
 
-import honda_2015
+import km3flux
 
-DATADIR = os.path.dirname(honda_2015.__file__)
+DATADIR = os.path.dirname(km3flux.__file__)
 FLUXFILE = DATADIR + '/data/honda2015_frejus_solarmin.h5'
 
 
@@ -15,7 +15,7 @@ class HondaFlux(object):
     """
     Get Honda 2015 atmospheric neutrino fluxes.
 
-    >>> from honda_2015 import HondaFlux
+    >>> from km3flux import HondaFlux
     >>> flux = HondaFlux()
 
     >>> zen = np.linspace(0, np.pi, 11)

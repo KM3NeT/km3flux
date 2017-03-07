@@ -1,6 +1,6 @@
-.. Honda 2015 documentation master file
+.. KM3Flux documentation master file
 
-Honda 2015
+KM3Flux
 =======
 
 .. toctree::

@@ -17,7 +17,7 @@ coszen_hi = cos_zen_binlims[1:]
 cos_zen = coszen_low + 0.5 * coszen_binsize
 bins = np.column_stack((coszen_low, coszen_hi))
 
-prefix = '/home/mlotze/pkg/honda_2015/honda_2015'
+prefix = '/home/mlotze/pkg/km3flux/km3flux'
 dfs = []
 for lo, hi in bins:
     fname = prefix + '/' + 'cos_%s_%s.csv' % (str(lo), str(hi))

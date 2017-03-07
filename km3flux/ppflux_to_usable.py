@@ -16,7 +16,7 @@ def ahs(mct, ene, zen):
     )
 
 
-honda_fname = '/home/mlotze/pkg/honda_2015/honda_2015/data/honda2015_frejus_solarmin.h5'
+honda_fname = '/home/mlotze/pkg/km3flux/km3flux/data/honda2015_frejus_solarmin.h5'
 with tb.open_file(honda_fname) as h5:
     ebins = h5.root.energy_binlims[:]
     czbins = h5.root.cos_zen_binlims[:]

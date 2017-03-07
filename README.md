@@ -1,8 +1,9 @@
-# Honda 2015 
+# KM3Flux
 
 ## About
 
-Parse [tables](http://www.icrr.u-tokyo.ac.jp/~mhonda/) from [Honda 2015](http://journals.aps.org/prd/abstract/10.1103/PhysRevD.92.023004) paper.
+Parse [tables](http://www.icrr.u-tokyo.ac.jp/~mhonda/) from [Honda 2015](http://journals.aps.org/prd/abstract/10.1103/PhysRevD.92.023004) paper
+(and others).
 
 Currently only Azimmuth-averaged. 
 
