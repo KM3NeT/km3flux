@@ -2,11 +2,11 @@
 # vim:set ts=4 sts=4 sw=4 et:
 
 from setuptools import setup
-from km3flux import version
+from km3flux import __version__
 
 setup(
     name='km3flux',
-    version=version,
+    version=__version__,
     description='Atmospheric Neutrino Fluxes',
     url='http://git.km3net.de/moritz/km3flux',
     author='Moritz Lotze',
