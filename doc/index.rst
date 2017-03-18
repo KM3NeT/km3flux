@@ -1,7 +1,6 @@
 .. KM3Flux documentation master file
 
-KM3Flux
-=======
+.. include:: version.txt
 
 .. toctree::
     :hidden:

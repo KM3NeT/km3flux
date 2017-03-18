@@ -13,20 +13,21 @@ export VERSION=$1
 git checkout master
 git pull
 
+vim CHANGELOG.rst
+git add CHANGELOG.rst
+git commit -m "Bumps changelog"
+
 echo "__version__ = ${VERSION}" .. > $MODULE/__init__.py
 git add $MODULE/__init__.py
-
-git commit -m "Bump version number"
 
 TITLE="${MODULE} ${VERSION}"
 echo "${TITLE}" > doc/version.txt
 echo "$(printf '=%.0s' {1..${#TITLE}})" >> doc/version.txt
 git add doc/version.txt
-git commit -m "update version tag in docs"
 
-vim CHANGELOG.rst
-git add CHANGELOG.rst
-git commit -m "Bumps changelog"
+git commit -m "Bump version number"
+
+git tag -a $VERSION
 
 rm -rf dist/*
 python setup.py sdist
