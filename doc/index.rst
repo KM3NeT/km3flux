@@ -11,5 +11,7 @@ KM3Flux
 
 .. toctree::
     :maxdepth: 2
+    
+    api
 
 * :ref:`genindex`
