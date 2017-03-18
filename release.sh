@@ -17,7 +17,7 @@ vim CHANGELOG.rst
 git add CHANGELOG.rst
 git commit -m "Bumps changelog"
 
-echo "__version__ = ${VERSION}" .. > $MODULE/__init__.py
+echo "__version__ = ${VERSION}" > $MODULE/__init__.py
 git add $MODULE/__init__.py
 
 TITLE="${MODULE} ${VERSION}"
