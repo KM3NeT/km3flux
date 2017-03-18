@@ -1,8 +1,9 @@
+"""KM3Pipe Modules for Fluxes."""
 from km3pipe import Module
-from km3flux import HondaFlux, HondaSarcevic
+from km3flux import Honda2015, HondaSarcevic
 
 
-class HondaMod(Module):
+class Honda2015Mod(Module):
     """Get the Honda 2015 fluxes.
 
     """
@@ -10,7 +11,7 @@ class HondaMod(Module):
         super(self.__class__, self).__init__(**context)
         self.key = self.require('key')
         self.average = self.get('average') or True
-        self.honda = HondaFlux()
+        self.honda = Honda2015()
 
     def process(self, blob):
         if self.key not in blob:

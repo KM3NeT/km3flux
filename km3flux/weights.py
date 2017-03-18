@@ -1,4 +1,8 @@
-"""Utilities to compute event weights."""
+"""Utilities to compute event weights.
+
+Most important is the make_weights function, to compute weights for mixed
+flavors (e.g. neutrinos + mupage).
+"""
 import numpy as np
 
 
@@ -6,6 +10,7 @@ def nu_wgt(w2, n_gen, adjust_orca_overlap=False, energy=None):
     """Get neutrino weight, optionally adjust for ORCA energy overlap.
 
     Aka crazy Joao hack:
+
         // If energy in overlap region, divide by 2
         if(nu.E>3 && nu.E<5) weight /= 2;
    """

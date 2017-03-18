@@ -11,12 +11,12 @@ DATADIR = os.path.dirname(km3flux.__file__)
 FLUXFILE = DATADIR + '/data/honda2015_frejus_solarmin.h5'
 
 
-class HondaFlux(object):
+class Honda2015(object):
     """
     Get Honda 2015 atmospheric neutrino fluxes.
 
-    >>> from km3flux import HondaFlux
-    >>> flux = HondaFlux()
+    >>> from km3flux import Honda2015
+    >>> flux = Honda2015()
 
     >>> zen = np.linspace(0, np.pi, 11)
     >>> ene = np.logspace(0, 2, 11)
