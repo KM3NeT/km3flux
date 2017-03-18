@@ -2,20 +2,23 @@
 
 ## About
 
-Parse [tables](http://www.icrr.u-tokyo.ac.jp/~mhonda/) from [Honda 2015](http://journals.aps.org/prd/abstract/10.1103/PhysRevD.92.023004) paper
-(and others).
+KM3Flux is a collection of neutrino flux models + assorted utilities for
+computing event weights.
 
-Currently only Azimmuth-averaged. 
+## Install
 
-Frejus-Solarminimum is my personal favorite (close to ORCA).
+This is developed on python 3.6. Lower versions (especially py2)
+might or might not work.
 
-Unfortunately, if you want a different earthlocation/non-azimuth-averaged tables, the per-zenith-split tables
-have to be generated manually at the moment.
+Install the dependencies
 
-## Units
+* numpy 
+* pandas
+* h5py
+* pytables 
 
-all energy GeV
-Flux (m^2 sec sr GeV)
+In your python env, do
 
-cosine column is bincenter: 
-    [0.8 -- 0.9] => 0.85
+    pip install git+http://git.km3net.de/moritz/km3flux.git
+
+or just clone the git repository and install via ``pip install .``
