@@ -1,6 +1,10 @@
 Unreleased Changes
 ------------------
 
+0.10.3
+======
+* fix dependencies + docs
+
 0.10.2 / 2017-03-18
 ------------------
 * initial versioned release
