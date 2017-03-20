@@ -15,7 +15,10 @@ def nu_wgt(w2, n_gen, adjust_orca_overlap=False, energy=None):
         if(nu.E>3 && nu.E<5) weight /= 2;
    """
     wgt = w2 / n_gen
-    if adjust_orca_overlap and energy:
+    if adjust_orca_overlap and (energy is None):
+        raise ValueError("When correcting for orca overlap, you need "
+                         "to specify the energy.")
+    if adjust_orca_overlap and (energy is not None):
         overlap_mask = (3 <= energy) & (energy <= 5)
         wgt[overlap_mask] /= 2
     return wgt
