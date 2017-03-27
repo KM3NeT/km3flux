@@ -2,6 +2,7 @@ from unittest import TestCase
 
 import numpy as np
 
+from km3flux.flux import (Honda2015, HondaSarcevic, DarkMatterFlux)     # noqa
 from km3flux.data import dm_gc_spectrum
 
 
@@ -27,3 +28,22 @@ class TestDMSpectra(TestCase):
             x, y = dm_gc_spectrum('nu_mu', 'crazy', '90')
         with self.assertRaises(KeyError):
             x, y = dm_gc_spectrum('nu_mu', 'b', '90000000000')
+
+
+class TestDMFlux(TestCase):
+    def test_init(self):
+        dmf = DarkMatterFlux(flavor='nu_mu', channel='w', mass=90)
+        assert dmf is not None
+
+    def test_flux(self):
+        dmf = DarkMatterFlux(flavor='nu_mu', channel='w', mass=90)
+        dmf.get([3])
+        dmf.get([20])
+        with self.assertRaises(ValueError):
+            dmf.get([99])
+        dmf.get([18])
+        energy = np.array([3, 20, 18, 2, 4, 50, 28])
+        dmf.get(energy)
+        bad_energy = np.array([3, 20, 18, 2, 4, 50, 28, 99])
+        with self.assertRaises(ValueError):
+            dmf.get(bad_energy)
