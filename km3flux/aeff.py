@@ -1,9 +1,13 @@
-"""Utilities for effective Area computation."""
+"""Utilities for effective Area computation.
+
+All energies in GeV.
+"""
+
 import numpy as np
-from scipy.integrate import romberg
+from scipy.integrate import romberg, simps
 
 
-def integrated_energy(gamma=1.0, e_min=1.0, e_max=100.0):
+def integrated_powerlaw(gamma=1.0, e_min=1.0, e_max=100.0):
     """Integrate area below powerlaw E^-gamma."""
     # make this float, not int
     # numpy complains on `np.power(int, -foo)`
@@ -15,8 +19,16 @@ def integrated_energy(gamma=1.0, e_min=1.0, e_max=100.0):
 
 
 def integrate_flux_sampled(flux, energy, emin=1, emax=100):
-    """Integrate a flux over energy, from given samples."""
-    pass
+    """Integrate a flux over energy, from given samples.
+
+    Optionally, you can clip the integration range.
+
+    Uses Simpson integration.
+    """
+    mask = (emin <= energy) & (energy <= emax)
+    flux = flux[mask]
+    energy = energy[mask]
+    return simps(flux, energy)
 
 
 def integrate_flux(flux, emin=1, emax=100, **kwargs):
@@ -28,6 +40,7 @@ def integrate_flux(flux, emin=1, emax=100, **kwargs):
 
 
 def integrated_zenith(zen_min=0, zen_max=np.pi):
+    """Integrate zenith."""
     # integrate zenith, but while in cosine
     return 2 * np.pi * np.abs(np.cos(zen_max) - np.cos(zen_min))
 
@@ -38,7 +51,7 @@ def aeff_scale_factor(gamma=2, solid_angle=4 * np.pi, divide_by_year=False):
     if divide_by_year:
         seconds_in_a_year = 365.25 * 24 * 60 * 60
         fact = seconds_in_a_year
-    return integrated_energy(gamma) * integrated_zenith() / (fact * solid_angle)
+    return integrated_powerlaw(gamma) * integrated_zenith() / (fact * solid_angle)
 
 
 def event_ratio(fluxweight_pre, fluxweight_post):
