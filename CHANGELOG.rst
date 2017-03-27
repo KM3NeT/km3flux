@@ -1,6 +1,11 @@
 Unreleased Changes
 ------------------
 
+0.11
+====
+* add dark matter fluxes
+* cleanup file naming logic
+
 0.10.3
 ======
 * fix dependencies + docs
