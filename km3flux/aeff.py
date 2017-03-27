@@ -45,15 +45,6 @@ def integrated_zenith(zen_min=0, zen_max=np.pi):
     return 2 * np.pi * np.abs(np.cos(zen_max) - np.cos(zen_min))
 
 
-def aeff_scale_factor(gamma=2, solid_angle=4 * np.pi, divide_by_year=False):
-    # what does this even _mean_?
-    fact = 1
-    if divide_by_year:
-        seconds_in_a_year = 365.25 * 24 * 60 * 60
-        fact = seconds_in_a_year
-    return integrated_powerlaw(gamma) * integrated_zenith() / (fact * solid_angle)
-
-
 def event_ratio(fluxweight_pre, fluxweight_post):
     n_events_pre = np.sum(fluxweight_pre)
     n_events_post = np.sum(fluxweight_post)
@@ -81,14 +72,24 @@ def event_ratio_2d(fluxweight_pre, fluxweight_post, binstat_x_pre,
     return hist_post / hist_pre
 
 
-def effective_area(incoming_flux, weights_detected_events, emin=1, emax=100):
+def effective_area(flux_func, w2_over_ngen, energy, solid_angle=4 * np.pi,
+                   year_to_second=True, **integargs):
     """Effective Area.
 
     Compare the raw incoming flux (sans detector effects) to the
     events detected (including detector effects + cuts).
 
+    This one assumes an isotropic flux.
+
     Raw flux: integral over e.g. the bare Honda flux.
 
     detected: corrected_w2 * flux (after cuts ifneedbe)
     """
-    pass
+    energy = np.atleast_1d(energy)
+    w2_over_ngen = np.atleast_1d(w2_over_ngen)
+    flux_samples = flux_func(energy)
+    flux_integ = integrate_flux(flux_func, **integargs)
+    out = np.sum(w2_over_ngen * flux_samples) / (solid_angle * flux_integ)
+    if year_to_second:
+        out /= 365.25 * 24 * 60 * 60
+    return out
