@@ -42,6 +42,23 @@ class Honda2015(object):
         # adjust upper bin for the case zenith==0
         self.cos_zen_bins[-1] += 0.00001
 
+        # optionally, this can be fixed to make it a single-arg callable
+        self._flavor = None
+
+    @property
+    def flavor(self):
+        return self._flavor
+
+    @flavor.setter
+    def flavor(self, flav):
+        self._flavor = flav
+
+    def __call__(self, energy):
+        # for use e.g. with `scipy.integrate`
+        if self.flavor is None:
+            raise ValueError("No flavor set! aborting...")
+        return self.get(self.flavor, energy)
+
     def get(self, flavor, energy, zenith=None):
         if zenith is None:
             return self._averaged(flavor, energy)
@@ -80,6 +97,23 @@ class HondaSarcevic(object):
                 self.tables[flavor] = h5['honda_sarcevic/' + flavor][:]
         # adjust upper bin for the case zenith==0
         self.cos_zen_bins[-1] += 0.00001
+
+        # optionally, this can be fixed to make it a single-arg callable
+        self._flavor = None
+
+    @property
+    def flavor(self):
+        return self._flavor
+
+    @flavor.setter
+    def flavor(self, flav):
+        self._flavor = flav
+
+    def __call__(self, energy):
+        # for use e.g. with `scipy.integrate`
+        if self.flavor is None:
+            raise ValueError("No flavor set! aborting...")
+        return self.get(self.flavor, energy)
 
     def get(self, flavor, energy, zenith):
         return self._with_zenith(flavor, energy=energy, zenith=zenith)
