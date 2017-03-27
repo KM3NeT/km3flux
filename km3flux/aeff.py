@@ -3,6 +3,7 @@ import numpy as np
 
 
 def integrated_energy(gamma=1.0, e_min=1.0, e_max=100.0):
+    """Integrate area below powerlaw E^-gamma."""
     # make this float, not int
     # numpy complains on `np.power(int, -foo)`
     if gamma == 1.0:
