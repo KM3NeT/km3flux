@@ -4,7 +4,7 @@ import logging
 
 import h5py
 import numpy as np
-from scipy.integrade import romberg, simps
+from scipy.integrate import romberg, simps
 
 from km3flux.data import (HONDAFILE, dm_gc_spectrum, DM_FLAVORS, DM_CHANNELS,
                           DM_MASSES)
@@ -38,11 +38,13 @@ class BaseFlux(object):
            3.77690000e-04, 6.87310000e-05])
     """
     def __init__(self, **kwargs):
-        raise NotImplementedError
+        pass
 
     def __call__(self, energy, zenith=None):
         if zenith is None:
             return self._averaged(energy)
+        if len(zenith) != len(energy):
+            raise ValueError("Zenith and energy need to have the same length.")
         return self._with_zenith(energy, zenith)
 
     def _averaged(self, energy):
@@ -52,13 +54,15 @@ class BaseFlux(object):
         raise NotImplementedError
 
     def integrate(self, zenith=None, emin=1, emax=100, **integargs):
-        return romberg(self, emin, emax, vec_fun=True, **integargs)
+        return romberg(self, emin, emax, vec_func=True, **integargs)
 
     def integrate_samples(self, energy, zenith=None, emin=1, emax=100,
                           **integargs):
+        energy = np.atleast_1d(energy)
         mask = (emin <= energy) & (energy <= emax)
         energy = energy[mask]
         if zenith:
+            zenith = np.atleast_1d(zenith)
             zenith = zenith[mask]
         flux = self(energy, zenith=zenith)
         return simps(flux, energy, **integargs)
