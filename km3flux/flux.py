@@ -196,6 +196,11 @@ def dmflux(energy, **kwargs):
     return dmf(energy)
 
 
+def e2flux(energy, **kwargs):
+    pf = PowerlawFlux(**kwargs)
+    return pf(energy)
+
+
 def all_dmfluxes():
     """Get all dark matter fluxes from all channels, masses, flavors."""
     fluxes = {}
