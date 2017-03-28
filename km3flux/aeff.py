@@ -4,39 +4,6 @@ All energies in GeV.
 """
 
 import numpy as np
-from scipy.integrate import romberg, simps
-
-
-def integrated_powerlaw(gamma=1.0, e_min=1.0, e_max=100.0):
-    """Integrate area below powerlaw E^-gamma."""
-    # make this float, not int
-    # numpy complains on `np.power(int, -foo)`
-    if gamma == 1.0:
-        return np.log(e_max) - np.log(e_min)
-    num = np.power(e_max, 1 - gamma) - np.power(e_min, 1 - gamma)
-    den = 1.0 - gamma
-    return num / den
-
-
-def integrate_flux_sampled(flux, energy, emin=1, emax=100):
-    """Integrate a flux over energy, from given samples.
-
-    Optionally, you can clip the integration range.
-
-    Uses Simpson integration.
-    """
-    mask = (emin <= energy) & (energy <= emax)
-    flux = flux[mask]
-    energy = energy[mask]
-    return simps(flux, energy)
-
-
-def integrate_flux(flux, emin=1, emax=100, **kwargs):
-    """Integrate a flux callable over energy.
-
-    Uses Romberg integration.
-    """
-    return romberg(flux, emin, emax, vec_func=True, **kwargs)
 
 
 def integrated_zenith(zen_min=0, zen_max=np.pi):
@@ -72,7 +39,7 @@ def event_ratio_2d(fluxweight_pre, fluxweight_post, binstat_x_pre,
     return hist_post / hist_pre
 
 
-def effective_area(flux_func, w2_over_ngen, energy, solid_angle=4 * np.pi,
+def effective_area(flux, w2_over_ngen, energy, solid_angle=4 * np.pi,
                    year_to_second=True, **integargs):
     """Effective Area.
 
@@ -84,11 +51,23 @@ def effective_area(flux_func, w2_over_ngen, energy, solid_angle=4 * np.pi,
     Raw flux: integral over e.g. the bare Honda flux.
 
     detected: corrected_w2 * flux (after cuts ifneedbe)
+
+    Parameters
+    ==========
+    flux: km3flux.flux.BaseFlux (or subclass) instance
+    w2_over_ngen:
+        weight_w2, already corrected for total events generated.
+        For gseagen, this is just `w2/ngen`, but
+        for genhen, this is `w2 / (ngen * nfil)`.
+    energy: array-like
+    solid_angle: float [in rad], default=4pi
+    year_to_second: bool, default=True
+        divide by n_seconds_in_year
     """
     energy = np.atleast_1d(energy)
     w2_over_ngen = np.atleast_1d(w2_over_ngen)
-    flux_samples = flux_func(energy)
-    flux_integ = integrate_flux(flux_func, **integargs)
+    flux_samples = flux(energy)
+    flux_integ = flux.integrate(**integargs)
     out = np.sum(w2_over_ngen * flux_samples) / (solid_angle * flux_integ)
     if year_to_second:
         out /= 365.25 * 24 * 60 * 60
