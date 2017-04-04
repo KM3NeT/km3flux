@@ -19,5 +19,7 @@ setup(
         'scipy',
         'h5py',
         'docopt',
+        'matplotlib>=2.0',
+        'pandas',
     ]
 )
