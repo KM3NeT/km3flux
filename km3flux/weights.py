@@ -62,3 +62,15 @@ def make_weights(w2, n_gen, livetime_sec, is_neutrino,
                               energy=energy)
     wgt[~is_neutrino] = atmu_wgt(livetime_sec[~is_neutrino])
     return wgt
+
+
+def add_weights_and_fluxes(df):
+    """Add weights + common fluxes."""
+    df['flavor'] = add_flavor(df)
+    df['wgt'] = make_weights(df.weight_w2, df.n_events_gen, df.livetime_sec,
+                             df.is_neutrino, adjust_orca_overlap=True,
+                             energy=df.energy)
+    df['e2flux'] = e2flux(df.energy)
+    df['honda'] = honda2015_df(df)
+    return df
+
