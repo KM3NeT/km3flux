@@ -16,7 +16,7 @@ setup(
     include_package_data=True,
     install_requires=[
         'numpy',
-        'scipy',
+        'scipy>=0.19',
         'h5py',
         'docopt',
         'matplotlib>=2.0',
