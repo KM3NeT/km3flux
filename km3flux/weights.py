@@ -4,6 +4,10 @@ Most important is the make_weights function, to compute weights for mixed
 flavors (e.g. neutrinos + mupage).
 """
 import numpy as np
+from km3pipe.mc import pdg2name
+
+from km3flux.flux import e2flux
+from km3flux.pandas import honda2015_df
 
 
 def nu_wgt(w2, n_gen, adjust_orca_overlap=False, energy=None):
@@ -62,6 +66,14 @@ def make_weights(w2, n_gen, livetime_sec, is_neutrino,
                               energy=energy)
     wgt[~is_neutrino] = atmu_wgt(livetime_sec[~is_neutrino])
     return wgt
+
+
+def add_flavor(df):
+    def t2f(row):
+        return pdg2name(row['type'])
+
+    flavor = df.apply(t2f, axis=1).astype('str')
+    return flavor
 
 
 def add_weights_and_fluxes(df):
