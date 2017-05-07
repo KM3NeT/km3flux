@@ -68,11 +68,19 @@ def make_weights(w2, n_gen, livetime_sec, is_neutrino,
     return wgt
 
 
-def add_flavor(df):
+def strange_flavor_to_mupage(flav, fill='mu+'):
+    mask = ((flav == 'N/A') | (flav == 'n'))
+    flav[mask] = fill
+    return flav
+
+
+def add_flavor(df, fix_strange_flavor=True):
     def t2f(row):
         return pdg2name(row['type'])
 
     flavor = df.apply(t2f, axis=1).astype('str')
+    if fix_strange_flavor:
+        flavor = strange_flavor_to_mupage(flavor)
     return flavor
 
 
@@ -84,5 +92,12 @@ def add_weights_and_fluxes(df):
                              energy=df.energy)
     df['e2flux'] = e2flux(df.energy)
     df['honda'] = honda2015_df(df)
+    df = make_atmo_weight(df)
     return df
 
+
+def make_atmo_weight(df_):
+    df_['wgt_atmo'] = df_.wgt.copy()
+    hon = df_.honda[df_.flavor != 'mu+']
+    df_.loc[df_.flavor != 'mu+', 'wgt_atmo'] *= hon
+    return df_
