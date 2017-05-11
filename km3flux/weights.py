@@ -28,13 +28,15 @@ def nu_wgt(w2, n_gen, adjust_orca_overlap=False, energy=None):
     return wgt
 
 
-def atmu_wgt(livetime_sec):
+def atmu_wgt(livetime_sec, fill_blank=False, fill=60.0):
     """Compute mupage weight."""
-    return 1 / livetime_sec
+    if fill_blank:
+        livetime_sec = np.full_like(livetime_sec, fill)
+    out = 1 / livetime_sec
 
 
 def make_weights(w2, n_gen, livetime_sec, is_neutrino,
-                 adjust_orca_overlap=False, energy=None):
+                 adjust_orca_overlap=False, energy=None, fix_atmu=False):
     """Generate weights for events of mixed flavor.
 
     This assumes that all arrays have the same length. If you have mixed
@@ -64,7 +66,8 @@ def make_weights(w2, n_gen, livetime_sec, is_neutrino,
     wgt[is_neutrino] = nu_wgt(w2[is_neutrino], n_gen[is_neutrino],
                               adjust_orca_overlap=adjust_orca_overlap,
                               energy=energy)
-    wgt[~is_neutrino] = atmu_wgt(livetime_sec[~is_neutrino])
+    wgt[~is_neutrino] = atmu_wgt(livetime_sec[~is_neutrino],
+                                 fill_blank=fix_atmu)
     return wgt
 
 
@@ -84,12 +87,12 @@ def add_flavor(df, fix_strange_flavor=True):
     return flavor
 
 
-def add_weights_and_fluxes(df):
+def add_weights_and_fluxes(df, **kwargs):
     """Add weights + common fluxes."""
     df['flavor'] = add_flavor(df)
     df['wgt'] = make_weights(df.weight_w2, df.n_events_gen, df.livetime_sec,
                              df.is_neutrino, adjust_orca_overlap=True,
-                             energy=df.energy)
+                             energy=df.energy, **kwargs)
     df['e2flux'] = e2flux(df.energy)
     df['honda'] = honda2015_df(df)
     df = make_atmo_weight(df)
