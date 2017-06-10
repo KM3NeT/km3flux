@@ -5,7 +5,11 @@ import numpy as np
 from km3flux.flux import Honda2015
 
 
-def honda2015_df(df, nevts=None, average=True, flavors=None):
+def honda2015_df(df, nevts=None, average=True, flavors=None, flux='honda2015'):
+    if flux == 'honda2015':
+        FluxClass = Honda2015
+    else:
+        raise KeyError(flux, ' not recognised!')
     if flavors is None:
         flavors = {'nu_mu', 'anu_mu', 'nu_e', 'anu_e'}      # noqa
     if nevts is None:
@@ -13,7 +17,7 @@ def honda2015_df(df, nevts=None, average=True, flavors=None):
     out = np.zeros(nevts)
     for flav in flavors:
         mask = np.array(df.flavor == flav, dtype=bool)
-        hf = Honda2015(flavor=flav)
+        hf = FluxClass(flavor=flav)
         if average:
             zen = None
         else:
