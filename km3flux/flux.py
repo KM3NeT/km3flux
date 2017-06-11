@@ -6,8 +6,10 @@ import h5py
 import numpy as np
 from scipy.integrate import romberg, simps
 
-from km3flux.data import (HONDAFILE, dm_gc_spectrum, DM_FLAVORS, DM_CHANNELS,
-                          DM_MASSES)
+from km3flux.data import (HONDAFILE, dm_gc_spectrum, dm_sun_spectrum,
+                          DM_GC_FLAVORS, DM_GC_CHANNELS, DM_GC_MASSES,
+                          DM_SUN_FLAVORS, DM_SUN_CHANNELS, DM_SUN_MASSES
+                         )
 
 
 class BaseFlux(object):
@@ -166,12 +168,17 @@ class DarkMatterFlux(BaseFlux):
          6.87310000e-05,   1.42550000e-05])
 
     """
-    def __init__(self, flavor='nu_mu', channel='w', mass=1000):
+    def __init__(self, source='gc', flavor='nu_mu', channel='w', mass=1000):
         self.flavor = flavor
         self.channel = channel
         self.mass = mass
-        self.counts, self.lims = dm_gc_spectrum(flavor=flavor, channel=channel,
-                                                mass=mass, full_lims=True)
+        if source == 'sun':
+            loader = dm_sun_spectrum
+        else:
+            loader = dm_gc_spectrum
+
+        self.counts, self.lims = loader(flavor=flavor, channel=channel,
+                                        mass=mass, full_lims=True)
 
     def _averaged(self, energy):
         energy = np.atleast_1d(energy)
@@ -201,21 +208,29 @@ def e2flux(energy, **kwargs):
     return pf(energy)
 
 
-def all_dmfluxes():
+def all_dmfluxes(source='gc'):
     """Get all dark matter fluxes from all channels, masses, flavors."""
     fluxes = {}
-    for flav in DM_FLAVORS:
-        for chan in DM_CHANNELS:
-            for mass in DM_MASSES:
+    if source == 'sun':
+        flavors = DM_SUN_FLAVORS
+        channels = DM_SUN_CHANNELS
+        masses = DM_SUN_MASSES
+    else:
+        flavors = DM_GC_FLAVORS
+        channels = DM_GC_CHANNELS
+        masses = DM_GC_MASSES
+    for flav in flavors:
+        for chan in channels:
+            for mass in masses:
                 mass = int(mass)
                 fluxname = (flav, chan, mass)
-                fluxes[fluxname] = DarkMatterFlux(flavor=flav, channel=chan,
-                                                  mass=mass)
+                fluxes[fluxname] = DarkMatterFlux(source=source, flavor=flav,
+                                                  channel=chan, mass=mass)
     return fluxes
 
 
-def all_dmfluxes_sampled(energy):
-    fluxes = all_dmfluxes()
+def all_dmfluxes_sampled(energy, **kwargs):
+    fluxes = all_dmfluxes(**kwargs)
     sampled_fluxes = {}
     for fluxname, flux in fluxes.items():
         sampled_fluxes[fluxname] = flux(energy)
