@@ -5,6 +5,7 @@ import logging
 import h5py
 import numpy as np
 from scipy.integrate import romberg, simps
+from scipy.stats import describe        # noqa
 
 from km3flux.data import (HONDAFILE, dm_gc_spectrum, dm_sun_spectrum,
                           DM_GC_FLAVORS, DM_GC_CHANNELS, DM_GC_MASSES,
@@ -182,6 +183,8 @@ class DarkMatterFlux(BaseFlux):
 
     def _averaged(self, energy):
         energy = np.atleast_1d(energy)
+        print(describe(energy))
+        print(describe(self.lims))
         if np.any(energy > self.lims.max()):
             raise ValueError(
                 "Some energies exceed parent mass '{}'!".format(self.mass))
