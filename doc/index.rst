@@ -1,6 +1,7 @@
 .. KM3Flux documentation master file
 
-.. include:: version.txt
+KM3Flux
+=======
 
 KM3Flux is a collection of neutrino flux models + assorted utilities for
 computing event weights.
@@ -20,9 +21,7 @@ Install the dependencies
 
 In your python env, do
 
-  pip install git+http://git.km3net.de/moritz/km3flux.git
-
-or just clone the git repository and install via ``pip install .``
+  pip install km3flux
 
 Contents
 --------
@@ -36,6 +35,7 @@ Contents
 .. toctree::
     :maxdepth: 2
     
+    examples
     api
 
 * :ref:`genindex`
