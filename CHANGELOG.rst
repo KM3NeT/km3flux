@@ -1,6 +1,11 @@
 Unreleased Changes
 ------------------
 
+0.12
+====
+* add usage example
+* fix pandas handling bugs
+
 0.11
 ====
 * add dark matter fluxes
