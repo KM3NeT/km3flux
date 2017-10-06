@@ -33,6 +33,7 @@ def atmu_wgt(livetime_sec, fill_blank=False, fill=60.0):
     if fill_blank:
         livetime_sec = np.full_like(livetime_sec, fill)
     out = 1 / livetime_sec
+    return out
 
 
 def make_weights(w2, n_gen, livetime_sec, is_neutrino,
@@ -89,6 +90,9 @@ def add_flavor(df, fix_strange_flavor=True):
 
 def add_weights_and_fluxes(df, **kwargs):
     """Add weights + common fluxes."""
+    for k in ['weight_w2', 'n_events_gen', 'livetime_sec',
+              'is_neutrino', 'energy']:
+        assert k in df.columns
     df['flavor'] = add_flavor(df)
     df['wgt'] = make_weights(df.weight_w2, df.n_events_gen, df.livetime_sec,
                              df.is_neutrino, adjust_orca_overlap=True,
