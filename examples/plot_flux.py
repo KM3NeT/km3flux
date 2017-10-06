@@ -34,6 +34,9 @@ flavors = {'nu_mu', 'anu_mu', 'nu_e', 'anu_e'}
 for flav in flavors:
     flux = Honda2015(flavor=flav)
     plt.plot(ene, flux(ene), label=flav)
-plt.legend()
+
 plt.yscale('log')
 plt.xscale('log')
+plt.xlabel('Energy / GeV')
+plt.ylabel(r'Flux / (m$^2$ sec sr GeV)$^{-1}$')
+plt.legend()
