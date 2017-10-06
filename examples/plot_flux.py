@@ -13,6 +13,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from km3flux.flux import Honda2015
+import km3pipe.style
+km3pipe.style.use('moritz')
 
 ##############################################
 # define energy + zenith range
