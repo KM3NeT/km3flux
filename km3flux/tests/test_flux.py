@@ -50,6 +50,10 @@ class TestHonda2015(TestCase):
         with self.assertRaises(IndexError):
             self.flux.integrate_samples([1, 2, 3], [1, 2])
 
+    def test_scalar(self):
+        self.flux(1)
+        self.flux(1, zenith=2)
+
 
 class TestHondaSarcevic(TestCase):
     def setUp(self):

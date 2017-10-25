@@ -44,8 +44,10 @@ class BaseFlux(object):
         pass
 
     def __call__(self, energy, zenith=None):
+        energy = np.atleast_1d(energy)
         if zenith is None:
             return self._averaged(energy)
+        zenith = np.atleast_1d(zenith)
         if len(zenith) != len(energy):
             raise ValueError("Zenith and energy need to have the same length.")
         return self._with_zenith(energy, zenith)
