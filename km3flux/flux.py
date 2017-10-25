@@ -1,16 +1,22 @@
 """Assorted Fluxes, in  (m^2 sec sr GeV)^-1"""
 
 import logging
+from six import string_types
 
 import h5py
 import numpy as np
+import pandas as pd
 from scipy.integrate import romberg, simps
 from scipy.stats import describe        # noqa
 
+from km3pipe.mc import name2pdg, pdg2name
 from km3flux.data import (HONDAFILE, dm_gc_spectrum, dm_sun_spectrum,
                           DM_GC_FLAVORS, DM_GC_CHANNELS, DM_GC_MASSES,
                           DM_SUN_FLAVORS, DM_SUN_CHANNELS, DM_SUN_MASSES
                          )
+
+FLAVORS = ('nu_e', 'anu_e', 'nu_mu', 'anu_mu')
+MCTYPES = [name2pdg(name) for name in FLAVORS]
 
 
 class BaseFlux(object):
@@ -99,7 +105,7 @@ class Honda2015(BaseFlux):
         self.table = None
         self.avtable = None
         filename = HONDAFILE
-        if flavor not in ('nu_e', 'anu_e', 'nu_mu', 'anu_mu'):
+        if flavor not in FLAVORS:
             raise ValueError("Unsupported flux '{}'".format(flavor))
         with h5py.File(filename, 'r') as h5:
             self.energy_bins = h5['energy_binlims'][:]
@@ -133,7 +139,7 @@ class HondaSarcevic(BaseFlux):
         self.table = None
         self.avtable = None
         filename = HONDAFILE
-        if flavor not in ('nu_e', 'anu_e', 'nu_mu', 'anu_mu'):
+        if flavor not in FLAVORS:
             raise ValueError("Unsupported flux '{}'".format(flavor))
         with h5py.File(filename, 'r') as h5:
             self.energy_bins = h5['energy_binlims'][:]
@@ -240,3 +246,28 @@ def all_dmfluxes_sampled(energy, **kwargs):
     for fluxname, flux in fluxes.items():
         sampled_fluxes[fluxname] = flux(energy)
     return fluxes
+
+
+class Flux():
+    fluxmodels = {
+        'Honda2015': Honda2015,
+        'HondaSarcevic': HondaSarcevic,
+    }
+
+    def __init__(self, fluxclass):
+        if isinstance(fluxclass, string_types):
+            fluxclass = self.fluxmodels[fluxclass]
+        self.flux_flavors = {}
+        for flav in FLAVORS:
+            self.flux_flavors[flav] = fluxclass(flav)
+
+    def __call__(self, energy, zenith=None, flavor=None, mctype=None):
+        """mctype is ignored if flavor is passed as arg."""
+        if mctype is None and flavor is None:
+            raise ValueError("Specify either mctype(int) or flavor(string)")
+        if flavor is None:
+            mctype = pd.Series(np.atleast_1d(mctype))
+            flavor = mctype.apply(pdg2name).values
+
+        # how to do this if a scalor OR vector?
+        return self.flux_flavors[flavor](energy, zenith)
