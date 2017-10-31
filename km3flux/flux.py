@@ -14,18 +14,10 @@ from km3flux.data import (HONDAFILE, dm_gc_spectrum, dm_sun_spectrum,
                           DM_GC_FLAVORS, DM_GC_CHANNELS, DM_GC_MASSES,
                           DM_SUN_FLAVORS, DM_SUN_CHANNELS, DM_SUN_MASSES
                          )
+from km3pipe.tools import issorted, bincenters
 
 FLAVORS = ('nu_e', 'anu_e', 'nu_mu', 'anu_mu')
 MCTYPES = [name2pdg(name) for name in FLAVORS]
-
-
-def issorted(arr):
-    return np.all(np.diff(arr) >= 0)
-
-
-def bincenters(bins):
-    bins = np.atleast_1d(bins)
-    return 0.5 * (bins[1:] + bins[:-1])
 
 
 class BaseFlux(object):
