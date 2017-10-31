@@ -274,6 +274,15 @@ def all_dmfluxes_sampled(energy, **kwargs):
 
 
 class AllFlavorFlux():
+    """Get mixed-flavor fluxes.
+
+    Methods
+    =======
+    __init__(fluxclass='Honda2015')
+
+    __call__(energy, zenith=None)
+        Return the flux on energy, optionally on zenith.
+    """
     fluxmodels = {
         'Honda2015': Honda2015,
         'HondaSarcevic': HondaSarcevic,
@@ -283,7 +292,7 @@ class AllFlavorFlux():
         if isinstance(fluxclass, string_types):
             fluxclass = self.fluxmodels[fluxclass]
         self.flux_flavors = {}
-        for flav in FLAVORS:
+
             self.flux_flavors[flav] = fluxclass(flav)
 
     def __call__(self, energy, zenith=None, flavor=None, mctype=None):
