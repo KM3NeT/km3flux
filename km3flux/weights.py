@@ -3,6 +3,8 @@
 Most important is the make_weights function, to compute weights for mixed
 flavors (e.g. neutrinos + mupage).
 """
+from __future__ import division, absolute_import, print_function
+
 import numpy as np
 from km3pipe.mc import pdg2name
 
