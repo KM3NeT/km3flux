@@ -3,6 +3,8 @@
 KM3Flux
 =======
 
+.. image:: https://readthedocs.org/projects/km3flux/badge/?version=latest
+
 KM3Flux is a collection of neutrino flux models + assorted utilities for
 computing event weights.
 
