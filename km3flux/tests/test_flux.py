@@ -2,7 +2,7 @@ from unittest import TestCase
 
 import numpy as np
 
-from km3flux.flux import (bincenters, BaseFlux, Honda2015, HondaSarcevic,
+from km3flux.flux import (BaseFlux, Honda2015, HondaSarcevic,
                           DarkMatterFlux, AllFlavorFlux
                           )     # noqa
 from km3flux.data import dm_gc_spectrum
@@ -121,12 +121,6 @@ class TestDartMatterLoader(TestCase):
             x, y = dm_gc_spectrum('nu_mu', 'crazy', '90')
         with self.assertRaises(KeyError):
             x, y = dm_gc_spectrum('nu_mu', 'b', '90000000000')
-
-
-class TestMisc(TestCase):
-    def test_binlims(self):
-        bins = np.linspace(0, 20, 21)
-        assert bincenters(bins).shape[0] == bins.shape[0] - 1
 
 
 class TestAllFlavorFlux(TestCase):
