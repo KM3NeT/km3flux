@@ -18,8 +18,10 @@ km3pipe.style.use('moritz')
 
 ##############################################
 # define energy + zenith range
-zen = np.linspace(0, np.pi, 5)
-ene = np.logspace(0, 2, 5)
+n_points = 100
+
+zen = np.linspace(0, np.pi, n_points)
+ene = np.logspace(0, 2, n_points)
 
 ##############################################
 # look at numu flux

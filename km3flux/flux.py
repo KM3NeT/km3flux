@@ -7,7 +7,7 @@ import h5py
 import numpy as np
 import pandas as pd
 from scipy.integrate import romberg, simps
-from scipy.stats import describe        # noqa
+from scipy.interpolate import splrep, splev, bisplev, bisplrep, RectBivariateSpline
 
 from km3pipe.mc import name2pdg, pdg2name
 from km3flux.data import (HONDAFILE, dm_gc_spectrum, dm_sun_spectrum,
@@ -17,6 +17,15 @@ from km3flux.data import (HONDAFILE, dm_gc_spectrum, dm_sun_spectrum,
 
 FLAVORS = ('nu_e', 'anu_e', 'nu_mu', 'anu_mu')
 MCTYPES = [name2pdg(name) for name in FLAVORS]
+
+
+def issorted(arr):
+    return np.all(np.diff(arr) >=0)
+
+
+def bincenters(bins):
+    bins = np.atleast_1d(bins)
+    return 0.5 * (bins[1:] + bins[:-1])
 
 
 class BaseFlux(object):
@@ -56,7 +65,7 @@ class BaseFlux(object):
         zenith = np.atleast_1d(zenith)
         if len(zenith) != len(energy):
             raise ValueError("Zenith and energy need to have the same length.")
-        return self._with_zenith(energy, zenith)
+        return self._with_zenith(energy=energy, zenith=zenith)
 
     def _averaged(self, energy):
         raise NotImplementedError
@@ -114,21 +123,47 @@ class Honda2015(BaseFlux):
             self.avtable = h5['averaged/' + flavor][:]
         # adjust upper bin for the case zenith==0
         self.cos_zen_bins[-1] += 0.00001
+        self.energy_bincenters = bincenters(self.energy_bins)
+        self.cos_zen_bincenters = bincenters(self.cos_zen_bins)
+        assert issorted(self.cos_zen_bincenters)
+        assert issorted(self.energy_bincenters)
+        assert self.avtable.shape == self.energy_bincenters.shape
+        assert self.table.shape[0] == self.cos_zen_bincenters.shape[0]
+        assert self.table.shape[1] == self.energy_bincenters.shape[0]
+        self.avinterpol = splrep(
+            self.energy_bincenters,
+            self.avtable,
+        )
+        self.interpol = RectBivariateSpline(
+            self.cos_zen_bincenters,
+            self.energy_bincenters,
+            self.table
+        )
 
-    def _averaged(self, energy):
-        fluxtable = self.avtable
-        ene_bin = np.digitize(energy, self.energy_bins)
-        ene_bin = ene_bin - 1
-        return fluxtable[ene_bin]
+    def _averaged(self, energy, interpol=True):
+        if not interpol:
+            fluxtable = self.avtable
+            ene_bin = np.digitize(energy, self.energy_bins)
+            ene_bin = ene_bin - 1
+            return fluxtable[ene_bin]
+        else:
+            flux = splev(energy, self.avinterpol)
+            return flux
 
-    def _with_zenith(self, energy, zenith):
-        fluxtable = self.table
+    def _with_zenith(self, energy, zenith, interpol=True):
+        energy = np.atleast_1d(energy)
+        zenith = np.atleast_1d(zenith)
         cos_zen = np.cos(zenith)
-        ene_bin = np.digitize(energy, self.energy_bins)
-        zen_bin = np.digitize(cos_zen, self.cos_zen_bins)
-        ene_bin = ene_bin - 1
-        zen_bin = zen_bin - 1
-        return fluxtable[zen_bin, ene_bin]
+        if not interpol:
+            fluxtable = self.table
+            ene_bin = np.digitize(energy, self.energy_bins)
+            zen_bin = np.digitize(cos_zen, self.cos_zen_bins)
+            ene_bin = ene_bin - 1
+            zen_bin = zen_bin - 1
+            return fluxtable[zen_bin, ene_bin]
+        else:
+            flux = self.interpol.ev(cos_zen, energy)
+            return flux
 
 
 class HondaSarcevic(BaseFlux):
@@ -191,8 +226,6 @@ class DarkMatterFlux(BaseFlux):
 
     def _averaged(self, energy):
         energy = np.atleast_1d(energy)
-        print(describe(energy))
-        print(describe(self.lims))
         if np.any(energy > self.lims.max()):
             raise ValueError(
                 "Some energies exceed parent mass '{}'!".format(self.mass))
