@@ -7,7 +7,7 @@ import h5py
 import numpy as np
 import pandas as pd
 from scipy.integrate import romberg, simps
-from scipy.interpolate import splrep, splev, bisplev, bisplrep, RectBivariateSpline
+from scipy.interpolate import splrep, splev, RectBivariateSpline
 
 from km3pipe.mc import name2pdg, pdg2name
 from km3flux.data import (HONDAFILE, dm_gc_spectrum, dm_sun_spectrum,
@@ -20,7 +20,7 @@ MCTYPES = [name2pdg(name) for name in FLAVORS]
 
 
 def issorted(arr):
-    return np.all(np.diff(arr) >=0)
+    return np.all(np.diff(arr) >= 0)
 
 
 def bincenters(bins):
