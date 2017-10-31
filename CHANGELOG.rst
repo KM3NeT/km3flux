@@ -1,7 +1,10 @@
 Unreleased Changes
 ------------------
 
+0.2.1
+=====
 * add allflavor flux (single function call for mixed flavors)
+* fix up docs, CI, packaging etc
 
 0.2
 ===
