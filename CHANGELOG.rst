@@ -1,6 +1,10 @@
 Unreleased Changes
 ------------------
 
+0.2
+===
+* fluxes are not interpolated with cubic splines
+
 0.12
 ====
 * add usage example
