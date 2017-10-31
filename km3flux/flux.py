@@ -292,7 +292,7 @@ class AllFlavorFlux():
         if isinstance(fluxclass, string_types):
             fluxclass = self.fluxmodels[fluxclass]
         self.flux_flavors = {}
-
+        for flav in FLAVORS:
             self.flux_flavors[flav] = fluxclass(flav)
 
     def __call__(self, energy, zenith=None, flavor=None, mctype=None):
