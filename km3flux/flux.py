@@ -281,13 +281,13 @@ def all_dmfluxes_sampled(energy, **kwargs):
     return fluxes
 
 
-class Flux():
+class AllFlavorFlux():
     fluxmodels = {
         'Honda2015': Honda2015,
         'HondaSarcevic': HondaSarcevic,
     }
 
-    def __init__(self, fluxclass):
+    def __init__(self, fluxclass='Honda2015'):
         if isinstance(fluxclass, string_types):
             fluxclass = self.fluxmodels[fluxclass]
         self.flux_flavors = {}
@@ -300,7 +300,16 @@ class Flux():
             raise ValueError("Specify either mctype(int) or flavor(string)")
         if flavor is None:
             mctype = pd.Series(np.atleast_1d(mctype))
-            flavor = mctype.apply(pdg2name).values
-
-        # how to do this if a scalor OR vector?
-        return self.flux_flavors[flavor](energy, zenith)
+            flavor = mctype.apply(pdg2name)
+        flavor = np.atleast_1d(flavor)
+        energy = np.atleast_1d(energy)
+        out = np.zeros_like(energy)
+        if zenith is not None:
+            zenith = np.atleast_1d(zenith)
+        for flav in np.unique(flavor):
+            where = flavor == flav
+            if zenith is not None:
+                loczen = zenith[where]
+            flux = self.flux_flavors[flav](energy[where], loczen)
+            out[where] = flux
+        return out

@@ -1,6 +1,8 @@
 Unreleased Changes
 ------------------
 
+* add allflavor flux (single function call for mixed flavors)
+
 0.2
 ===
 * fluxes are not interpolated with cubic splines
