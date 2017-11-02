@@ -34,3 +34,4 @@ dependencies:
     - numpydoc==0.7.0
     - docopt
     - controlhost
+    - km3pipe[full]>=7.3.2

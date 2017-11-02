@@ -21,5 +21,7 @@ setup(
         'docopt',
         'matplotlib>=2.0',
         'pandas',
+        'tables',
+        'km3pipe[full]>=7.3.2'
     ]
 )
