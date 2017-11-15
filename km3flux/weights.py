@@ -9,7 +9,6 @@ import numpy as np
 from km3pipe.mc import pdg2name
 
 from km3flux.flux import e2flux
-from km3flux.pandas import honda2015_df
 
 
 def nu_wgt(w2, n_gen, adjust_orca_overlap=False, energy=None):
@@ -100,7 +99,6 @@ def add_weights_and_fluxes(df, **kwargs):
                              df.is_neutrino, adjust_orca_overlap=True,
                              energy=df.energy, **kwargs)
     df['e2flux'] = e2flux(df.energy)
-    df['honda'] = honda2015_df(df)
     df = make_atmo_weight(df)
     return df
 
