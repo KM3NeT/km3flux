@@ -101,6 +101,12 @@ class PowerlawFlux(BaseFlux):
 class Honda2015(BaseFlux):
     """
     Get Honda 2015 atmospheric neutrino fluxes.
+
+    Whitepaper at https://arxiv.org/abs/1502.03916.
+
+    Flux table downloaded from http://www.icrr.u-tokyo.ac.jp/~mhonda/
+
+    Flux at Frejus site, no mountain, solar minimum.
     """
     def __init__(self, flavor='nu_mu'):
         self.table = None
