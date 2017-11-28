@@ -1,7 +1,7 @@
 """
-===================
-Plot Cirelli Fluxes
-===================
+======================
+Plot DarkMatter Fluxes
+======================
 
 Plot some Fluxes from WimpWimp -> foo in the GC.
 """
@@ -11,62 +11,37 @@ Plot some Fluxes from WimpWimp -> foo in the GC.
 
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 
-from km3flux.flux import dmflux, DarkMatterFlux, all_dmfluxes
-from km3flux.aeff import effective_area
+from km3flux.flux import DarkMatterFlux
 
-import km3pipe.style.moritz
+import km3pipe.style.moritz     # noqa
 
-###############################################################
-# plot flux vs energy
+#############################################################################
+# generate energies, logarithmically spaced, for which to compute fluxes
+energy = np.geomspace(10, 1000, 201)
+print(energy[:10])
 
-ene = np.logspace(0, 2, 2001)
-flux = dmflux(ene, flavor='anu_mu', channel='w', mass=5000)
-plt.loglog(ene, flux)
+#############################################################################
+# show available tables
 
-###############################################################
-# integrate a flux
+print('flavors:  ', DarkMatterFlux.flavors)
+print('channels: ', DarkMatterFlux.channels)
+print('masses:   ', DarkMatterFlux.masses)
 
-flux_callable = DarkMatterFlux(flavor='nu_mu', channel='w', mass=3000)
-flux_callable.integrate()
+#############################################################################
+# show a binned flux
 
-###############################################################
-# get the flux collection
-
-flux_coll = all_dmfluxes()
-integrated_fluxes = {}
-for fluxname, flux in flux_coll.items():
-    try:
-        integrated_fluxes[fluxname] = flux.integrate()
-    except (ValueError, IndexError):
-        continue
-
-integrated_fluxes = pd.DataFrame(integrated_fluxes).T
-integrated_fluxes.rename(columns={0: 'flux'}, inplace=True)
-
-#integrated_fluxes.sort_values(by='flux', inplace=True)
-integrated_fluxes.sort_index(level=2, inplace=True)
-
-###############################################################
-# plot them
-
-#eff_areas.groupby(level=1).plot(rot=45, logy=True, sharey=True, subplots=True)
-fig, axes = plt.subplots(ncols=4, figsize=(16, 3), sharex=False, sharey=True)
-for i, (tag, group) in enumerate(integrated_fluxes.groupby(level=1)):
-    group.plot(ax=axes[i], rot=45, logy=True)
-
-###############################################################
-# plot them differently
-
-integrated_fluxes.sort_values(by='flux').plot(rot=45)
+dmflux = DarkMatterFlux(flavor='nu_mu', channel='w', mass=3000)
+print(
+    dmflux(energy[:10])
+)
+plt.plot(energy, dmflux(energy))
 plt.yscale('log')
+plt.xscale('log')
 
+#############################################################################
+# show the same, but as interpolated flux
 
-###############################################################
-# get effective area
-
-effective_area(flux_callable, w2_over_ngen=1e-5,
-               solid_angle=4 * np.pi,
-               energy=np.geomspace(1, 100, 25)
-               )
+plt.plot(energy, dmflux(energy, interpolate=True))
+plt.yscale('log')
+plt.xscale('log')
