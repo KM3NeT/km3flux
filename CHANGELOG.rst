@@ -1,7 +1,10 @@
 Unreleased Changes
 ------------------
 
+0.2.1
+=====
 * all fluxes now interpolated by default
+* adapt DMflux to new baseclass API
 
 0.2.1
 =====
