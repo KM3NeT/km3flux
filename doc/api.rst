@@ -3,6 +3,27 @@ API Reference
 
 .. contents:: :local:
 
+
+``km3flux.flux``
+-----------------
+
+.. automodule:: km3flux.flux
+  :no-members:
+  :no-inherited-members:
+
+.. currentmodule:: km3flux.flux
+
+.. autosummary::
+  :toctree: api
+
+  BaseFlux
+  AllFlavorFlux
+  Honda2015
+  HondaSarcevic
+  PowerlawFlux
+  DarkMatterFlux
+
+
 ``km3flux.weights``
 ----------------
 
@@ -18,22 +39,9 @@ API Reference
   nu_wgt
   atmu_wgt
   make_weights
-
-
-``km3flux.common``
-------------------
-
-.. automodule:: km3flux.common
-  :no-members:
-  :no-inherited-members:
-
-.. currentmodule:: km3flux.common
-
-.. autosummary::
-  :toctree: api
-
-
-  e2flux
+  strange_flavor_to_mupage
+  add_flavor
+  add_weights_and_fluxes
 
 
 ``km3flux.aeff``
@@ -52,47 +60,3 @@ API Reference
   integrated_energy
   integrated_zenith
   aeff_scale_factor
-
-
-``km3flux.honda``
------------------
-
-.. automodule:: km3flux.honda
-  :no-members:
-  :no-inherited-members:
-
-.. currentmodule:: km3flux.honda
-
-.. autosummary::
-  :toctree: api
-
-  Honda2015
-  HondaSarcevic
-
-
-``km3flux.kpmod``
------------------
-
-.. automodule:: km3flux.kpmod
-  :no-members:
-  :no-inherited-members:
-
-.. currentmodule:: km3flux.kpmod
-
-.. autosummary::
-  :toctree: api
-
-  
-``km3flux.pandas``
------------------
-
-.. automodule:: km3flux.pandas
-  :no-members:
-  :no-inherited-members:
-
-.. currentmodule:: km3flux.pandas
-
-.. autosummary::
-  :toctree: api
-
-  honda2015_df 

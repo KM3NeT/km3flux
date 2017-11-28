@@ -8,7 +8,7 @@ setup(
     name='km3flux',
     version=__version__,
     description='Atmospheric Neutrino Fluxes',
-    url='http://git.km3net.de/moritz/km3flux',
+    url='http://git.km3net.de/km3py/km3flux',
     author='Moritz Lotze',
     author_email='mlotze@km3net.de',
     license='MIT',
@@ -21,5 +21,7 @@ setup(
         'docopt',
         'matplotlib>=2.0',
         'pandas',
+        'tables',
+        'km3pipe[full]>=7.3.2'
     ]
 )
