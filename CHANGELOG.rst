@@ -1,6 +1,8 @@
 Unreleased Changes
 ------------------
 
+* all fluxes now interpolated by default
+
 0.2.1
 =====
 * add allflavor flux (single function call for mixed flavors)
