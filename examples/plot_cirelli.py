@@ -35,13 +35,8 @@ dmflux = DarkMatterFlux(flavor='nu_mu', channel='w', mass=3000)
 print(
     dmflux(energy[:10])
 )
-plt.plot(energy, dmflux(energy))
+plt.plot(energy, dmflux(energy, interpolate=True), label='Interpolated')
+plt.plot(energy, dmflux(energy, interpolate=False), label='Binned')
 plt.yscale('log')
 plt.xscale('log')
-
-#############################################################################
-# show the same, but as interpolated flux
-
-plt.plot(energy, dmflux(energy, interpolate=True))
-plt.yscale('log')
-plt.xscale('log')
+plt.legend()

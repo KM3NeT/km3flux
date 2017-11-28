@@ -27,12 +27,15 @@ ene = np.logspace(0, 2, n_points)
 # look at numu flux (binned vs interpolated)
 
 numu_flux = Honda2015('nu_mu')
-print(
-    numu_flux(ene, interpolate=True)[:10]
+plt.plot(ene,
+         numu_flux(ene, interpolate=True), label='Interpolated'
 )
-print(
-    numu_flux(ene, interpolate=False)[:10]
+plt.plot(ene,
+         numu_flux(ene, interpolate=False), label='Binned'
 )
+plt.yscale('log')
+plt.xscale('log')
+plt.legend()
 
 ##############################################
 # Plot vs energy, for multiple flavors,
