@@ -10,8 +10,9 @@ from scipy.integrate import romberg, simps
 from scipy.interpolate import splrep, splev, RectBivariateSpline
 
 from km3pipe.mc import name2pdg, pdg2name
-from km3flux.data import (HONDAFILE, dm_gc_spectrum, dm_sun_spectrum,
-                          DM_GC_FLAVORS, DM_GC_CHANNELS, DM_GC_MASSES,
+from km3flux.data import (HONDAFILE, DM_GC_FLAVORS, DM_GC_CHANNELS,
+                          DM_GC_MASSES, DM_GC_FILE,
+                          #dm_gc_spectrum, dm_sun_spectrum,
                           # DM_SUN_FLAVORS, DM_SUN_CHANNELS, DM_SUN_MASSES
                          )
 from km3pipe.tools import issorted, bincenters
@@ -264,36 +265,31 @@ class DarkMatterFlux(BaseFlux):
             WimpWimp parent mass.
             See available masses stored in ``DarkMatterFlux.masses``
         """
-        self.flavor = flavor
-        self.channel = channel
-        self.mass = mass
-        if source == 'sun':
-            loader = dm_sun_spectrum
+        if source == 'gc':
+            fname = DM_GC_FILE
         else:
-            loader = dm_gc_spectrum
-
-        self.avtable, self.energy_bins = loader(flavor=flavor, channel=channel,
-                                                mass=mass, full_lims=True)
-        self.energy_bincenters = bincenters(self.energy_bins)
+            raise NotImplementedError('Only GC supported so far!')
+        print(fname)
+        tab = pd.read_hdf(fname)
+        tab = tab[(tab.flavor == flavor) & (tab.mass_dm == mass)]
+        self.flux = tab[channel].values
+        self.x_energy = tab['energy']
         self.avinterpol = splrep(
-            self.energy_bincenters,
-            self.avtable,
+            self.x_energy,
+            self.flux,
         )
 
-    def _averaged(self, energy, interpolate=True):
-        logger.debug("Interpolate? {}".format(interpolate))
+    @property
+    def points(self):
+        return self.x_energy, self.flux
+
+    def __call__(self, energy, interpolate=True):
         energy = np.atleast_1d(energy)
-        if np.any(energy > self.energy_bins.max()):
-            raise ValueError(
-                "Some energies exceed parent mass '{}'!".format(self.mass))
-        if not interpolate:
-            fluxtable = self.avtable
-            ene_bin = np.digitize(energy, self.energy_bins)
-            ene_bin = ene_bin - 1
-            return fluxtable[ene_bin]
-        else:
-            flux = splev(energy, self.avinterpol)
-            return flux
+        flux = splev(energy, self.avinterpol)
+        return flux
+
+    def _averaged(self, *args, **kwargs):
+        return self(*args, **kwargs)
 
     def _with_zenith(self, energy, zenith, interpolate=True):
         logger.debug("Interpolate? {}".format(interpolate))

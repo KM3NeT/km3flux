@@ -9,7 +9,8 @@ import km3flux
 
 DATADIR = os.path.dirname(km3flux.__file__) + '/data'
 HONDAFILE = DATADIR + '/honda2015_frejus_solarmin.h5'
-DM_GC_FILE = DATADIR + '/gc_spectra.h5'
+# DM_GC_FILE = DATADIR + '/gc_spectra.h5'
+DM_GC_FILE = DATADIR + '/cirelli_gc.h5'
 DM_GC_MASSES = {'100000', '260', '100', '5000', '360', '200', '10', '1000',
                 '750', '30000', '2000', '50', '10000', '180', '500', '150',
                 '3000', '25', '90', '1500'}

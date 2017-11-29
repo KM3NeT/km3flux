@@ -17,11 +17,6 @@ from km3flux.flux import DarkMatterFlux
 import km3pipe.style.moritz     # noqa
 
 #############################################################################
-# generate energies, logarithmically spaced, for which to compute fluxes
-energy = np.geomspace(10, 1000, 201)
-print(energy[:10])
-
-#############################################################################
 # show available tables
 
 print('flavors:  ', DarkMatterFlux.flavors)
@@ -29,14 +24,42 @@ print('channels: ', DarkMatterFlux.channels)
 print('masses:   ', DarkMatterFlux.masses)
 
 #############################################################################
-# show a binned flux
+# generate energies, logarithmically spaced, for which to compute fluxes
 
-dmflux = DarkMatterFlux(flavor='nu_mu', channel='w', mass=3000)
+dm_mass = 3000
+dm_channel = 'w'
+
+energy = np.geomspace(0.1, dm_mass, 201)
+print(energy[:10])
+
+#############################################################################
+# load the flux table. flux is then interpolated to our energies.
+
+dmflux = DarkMatterFlux(flavor='nu_mu', channel=dm_channel, mass=dm_mass)
 print(
-    dmflux(energy[:10])
+    dmflux(energy[:5])
 )
-plt.plot(energy, dmflux(energy, interpolate=True), label='Interpolated')
-plt.plot(energy, dmflux(energy, interpolate=False), label='Binned')
+
+#############################################################################
+# also grab the points from the table (used for the interpolation)
+# but keep only the ones in the energy range of interest
+
+x, y = dmflux.points
+mask = x >= energy.min()
+x = x[mask]
+y = y[mask]
+
+#############################################################################
+# plot everything
+
+plt.title(
+    r'$\nu_\mu$ Flux from WimpWimp $\to$ {chan}{chan}'.format(chan=dm_channel))
+plt.plot(energy, dmflux(energy),
+         label="Interpolated")
+plt.plot(x, y, 's',
+         label="From table", marker='x', markersize=2)
+plt.xlabel('Energy / GeV')
+plt.ylabel(r'$\frac{\mathrm{d}N}{\mathrm{d}}$ / cm$^2$ sec sr')
 plt.yscale('log')
 plt.xscale('log')
 plt.legend()
