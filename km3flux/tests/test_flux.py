@@ -94,6 +94,8 @@ class TestDMFlux(TestCase):
         dmf([18])
         energy = np.array([3, 20, 18, 2, 4, 50, 28])
         dmf(energy)
+        risky_energy = np.array([3, 20, 18, 2, 4, 50, 28, 90])
+        dmf(risky_energy)
         bad_energy = np.array([3, 20, 18, 2, 4, 50, 28, 99])
         with self.assertRaises(ValueError):
             dmf(bad_energy)

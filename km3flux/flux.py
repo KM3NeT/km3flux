@@ -269,7 +269,6 @@ class DarkMatterFlux(BaseFlux):
             fname = DM_GC_FILE
         else:
             raise NotImplementedError('Only GC supported so far!')
-        print(fname)
         self.mass = mass
         self.channel = channel
         self.flavor = flavor
@@ -287,8 +286,8 @@ class DarkMatterFlux(BaseFlux):
     def points(self):
         return self.x_energy, self.flux
 
-    def _check_energy(self, ene):
-        if np.any(ene >= self.mass):
+    def _check_energy(self, ene, epsilon=0.0001):
+        if np.any(ene > self.mass + epsilon):
             raise ValueError('Energies exceed parent mass!')
         return ene
 
