@@ -1,6 +1,9 @@
 Unreleased Changes
 ------------------
 
+0.2.1 (2017-11-29
+=================
+
 * replaces bugged (pre-histogrammed) cirelli tables with the tables
   taken directly from http://www.marcocirelli.net/PPPC4DMID.html
   (including EW corrections)
