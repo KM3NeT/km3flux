@@ -121,6 +121,8 @@ class Honda2015(BaseFlux):
 
     Flux at Frejus site, no mountain, solar minimum.
 
+    Units are (1 / m^2 sec sr GeV)
+
     Methods
     =======
     __init__(flavor='nu_mu')
@@ -225,6 +227,8 @@ class DarkMatterFlux(BaseFlux):
     Get Dark Matter WimpWimp->foo->nu spectra.
 
     Curently only gives Galactic Center spectra (taken from M. Cirelli).
+
+    Units are ``d/d n_particles / cm^2 sec sr``.
 
     Methods
     =======
