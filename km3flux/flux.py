@@ -270,6 +270,10 @@ class DarkMatterFlux(BaseFlux):
         else:
             raise NotImplementedError('Only GC supported so far!')
         print(fname)
+        self.mass = mass
+        self.channel = channel
+        self.flavor = flavor
+
         tab = pd.read_hdf(fname)
         tab = tab[(tab.flavor == flavor) & (tab.mass_dm == mass)]
         self.flux = tab[channel].values
@@ -283,8 +287,14 @@ class DarkMatterFlux(BaseFlux):
     def points(self):
         return self.x_energy, self.flux
 
+    def _check_energy(self, ene):
+        if np.any(ene >= self.mass):
+            raise ValueError('Energies exceed parent mass!')
+        return ene
+
     def __call__(self, energy, interpolate=True):
         energy = np.atleast_1d(energy)
+        energy = self._check_energy(energy)
         flux = splev(energy, self.avinterpol)
         return flux
 
