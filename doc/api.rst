@@ -22,10 +22,6 @@ API Reference
   HondaSarcevic
   PowerlawFlux
   DarkMatterFlux
-  dmflux
-  e2flux
-  all_dmfluxes
-  all_dmfluxes_samplesd
 
 
 ``km3flux.weights``

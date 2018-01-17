@@ -1,6 +1,18 @@
 Unreleased Changes
 ------------------
 
+0.2.1 (2017-11-29
+=================
+
+* replaces bugged (pre-histogrammed) cirelli tables with the tables
+  taken directly from http://www.marcocirelli.net/PPPC4DMID.html
+  (including EW corrections)
+
+0.2.1
+=====
+* all fluxes now interpolated by default
+* adapt DMflux to new baseclass API
+
 0.2.1
 =====
 * add allflavor flux (single function call for mixed flavors)
