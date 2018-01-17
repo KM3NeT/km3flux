@@ -25,6 +25,23 @@ DM_SUN_CHANNELS = {'11', '8', '5'}
 DM_SUN_CHAN_TRANS = {'8': 'w', '11': 'tau', '5': 'b'}
 DM_SUN_CHAN_TRANS_INV = {v: k for k, v in DM_SUN_CHAN_TRANS.items()}
 
+WIMPSIM_ANNIHILATION_CHANNELS = {
+    1: 'd d-bar',
+    2: 'u u-bar',
+    3: 's s-bar',
+    4: 'c c-bar',
+    5: 'b b-bar',
+    6: 't t-bar',
+    7: 'glue glue',
+    8: 'W+ W-',
+    9: 'Z0 Z0',
+    10: 'mu- mu+',
+    11: 'tau- tau+',
+    12: 'nu_e nu_e-bar',
+    13: 'nu_mu nu_mu-bar',
+    14: 'nu_tau nu_tau-bar',
+}
+
 
 def dm_gc_spectrum(flavor='nu_mu', channel='w', mass='100', full_lims=False):
     """Dark Matter spectra by M. Cirelli."""

@@ -199,11 +199,11 @@ class DarkMatterFlux(BaseFlux):
     Get Dark Matter spectra (taken from M. Cirelli).
 
     >>> from km3flux import DarkMatterFlux
-    >>> flux = DarkMatterFlux()
+    >>> flux = DarkMatterFlux('anu_mu')
 
     >>> ene = np.logspace(0, 2, 11)
 
-    >>> flux('anu_mu', ene)
+    >>> flux(ene)
     array([  6.68440000e+01,   1.83370000e+01,   4.96390000e+00,
          1.61780000e+00,   5.05350000e-01,   2.29920000e-01,
          2.34160000e-02,   2.99460000e-03,   3.77690000e-04,
