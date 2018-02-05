@@ -11,7 +11,9 @@ from scipy.interpolate import splrep, splev, RectBivariateSpline
 
 from km3pipe.mc import name2pdg, pdg2name
 from km3flux.data import (HONDAFILE, DM_GC_FLAVORS, DM_GC_CHANNELS,
-                          DM_GC_MASSES, DM_GC_FILE,
+                          DM_GC_MASSES, DM_GC_FILE, WIMPSIM_FILE,
+                          WIMPSIM_FLAVORS, WIMPSIM_INTERESTING_CHANNELS,
+                          WIMPSIM_MASSES,
                           #dm_gc_spectrum, dm_sun_spectrum,
                           # DM_SUN_FLAVORS, DM_SUN_CHANNELS, DM_SUN_MASSES
                          )
@@ -361,3 +363,67 @@ class AllFlavorFlux():
                                            interpolate=interpolate)
             out[where] = flux
         return out
+
+
+class WimpSimFlux(BaseFlux):
+    """WimpSim neutrino flux from Sun.
+
+    http://wimpsim.astroparticle.se/data.html
+
+    `z: nu mass / wimp mass`
+
+    `theta: angle towards center of sun`
+
+    `z=E_nu/m_WIMP`
+
+    2d layout: `d^2N/dz dtheta`
+
+    1d: `dN/dz`
+
+    Neutrinos at detector (icecube), the units are `cm^-2 annihilation^-1`.
+
+    we-res-jan2013-data.tar.gz
+
+    All energies in GeV.
+    """
+    def __init__(self, filename=None):
+        if filename is None:
+            filename = WIMPSIM_FILE
+        self.tab = pd.read_hdf(filename, '/flat')
+
+    @property
+    def points(self):
+        return self.x_energy, self.flux
+
+    def _check_energy(self, ene, epsilon=0.0001):
+        if np.any(ene > self.mass + epsilon):
+            raise ValueError('Energies exceed parent mass!')
+        return ene
+
+    def __call__(self, energy, interpolate=True,
+                 flavor='nu_mu', mass=1000.0, channel='W+ W-',
+                ):
+        tab = self.tab[
+            (self.tab.chan_num == 11) &
+            (np.isclose(self.tab.mass, 1000.0))
+        ]
+        flux = tab[flavor]
+        self.x_energy = tab['energy']
+        self.avinterpol = splrep(
+            self.x_energy,
+            self.flux,
+        )
+        energy = np.atleast_1d(energy)
+        energy = self._check_energy(energy)
+        flux = splev(energy, self.avinterpol)
+        return flux
+
+    def _averaged(self, *args, **kwargs):
+        return self(*args, **kwargs)
+
+    def _with_zenith(self, energy, zenith, interpolate=True):
+        logger.debug("Interpolate? {}".format(interpolate))
+        logging.warning('No zenith dependent flux implemented! '
+                        'Falling back to averaged flux.'
+                       )
+        return self._averaged(self, energy)

@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """Utilities for effective Area computation.
 
 All energies in GeV.
@@ -7,69 +8,41 @@ from __future__ import division, absolute_import, print_function
 import numpy as np
 
 
-def integrated_zenith(zen_min=0, zen_max=np.pi):
-    """Integrate zenith."""
-    # integrate zenith, but while in cosine
-    return 2 * np.pi * np.abs(np.cos(zen_max) - np.cos(zen_min))
+class Can(object):
+    z_min = -117.2
+    z_max = 139.5
+    r_max = 205.402
+
+    gen_vol = np.pi * (z_max - z_min) * np.square(r_max)
+
+    @classmethod
+    def contains(self, pos_r, pos_z):
+        return (pos_r < self.r_max) & \
+            (self.z_min < pos_z) & (pos_z < self.z_max)
 
 
-def event_ratio(fluxweight_pre, fluxweight_post):
-    n_events_pre = np.sum(fluxweight_pre)
-    n_events_post = np.sum(fluxweight_post)
-    return n_events_post / n_events_pre
+def gen_events():
+    from glob import glob
+    infiles = glob('muon-CC_3-100*')
+    n_files_with_muon_cc_3_100 = len(infiles)
+    normalization = {       # noqa
+        'muon-CC_3-100': 600 / n_files_with_muon_cc_3_100,
+    }
+    muon_cc_3_100_hist = []
+    can = Can()     # noqa
+
+    for fname in infiles:
+        norm = 600   # muon-cc_3-100
+        for evt in fname:
+            nu = evt.mc_trks[0]
+            pos_r = np.sqrt(np.square(nu.pos_x) + np.square(nu.pos_y))
+            if Can.contains(pos_r, nu.pos_z):
+                muon_cc_3_100_hist.fill(nu.E, nu.dir_z, wgt=1 / norm)
 
 
-def event_ratio_1d(fluxweight_pre, fluxweight_post, binstat_pre,
-                   binstat_post, bins):
-    hist_pre, _ = np.histogram(binstat_pre, bins=bins,
-                               weights=fluxweight_pre)
-    hist_post, _ = np.histogram(binstat_post, bins=bins,
-                                weights=fluxweight_post)
-    return hist_post / hist_pre
-
-
-def event_ratio_2d(fluxweight_pre, fluxweight_post, binstat_x_pre,
-                   binstat_x_post, binstat_y_pre, binstat_y_post, xbins,
-                   ybins):
-    hist_pre, _, _ = np.histogram2d(binstat_x_pre, binstat_y_pre,
-                                    bins=(xbins, ybins),
-                                    weights=fluxweight_pre)
-    hist_post, _, _ = np.histogram2d(binstat_x_post, binstat_y_post,
-                                     bins=(xbins, ybins),
-                                     weights=fluxweight_post)
-    return hist_post / hist_pre
-
-
-def effective_area(flux, w2_over_ngen, energy, solid_angle=4 * np.pi,
-                   year_to_second=True, **integargs):
-    """Effective Area.
-
-    Compare the raw incoming flux (sans detector effects) to the
-    events detected (including detector effects + cuts).
-
-    This one assumes an isotropic flux.
-
-    Raw flux: integral over e.g. the bare Honda flux.
-
-    detected: corrected_w2 * flux (after cuts ifneedbe)
-
-    Parameters
-    ==========
-    flux: km3flux.flux.BaseFlux (or subclass) instance
-    w2_over_ngen:
-        weight_w2, already corrected for total events generated.
-        For gseagen, this is just `w2/ngen`, but
-        for genhen, this is `w2 / (ngen * nfil)`.
-    energy: array-like
-    solid_angle: float [in rad], default=4pi
-    year_to_second: bool, default=True
-        divide by n_seconds_in_year
-    """
-    energy = np.atleast_1d(energy)
-    w2_over_ngen = np.atleast_1d(w2_over_ngen)
-    flux_samples = flux(energy)
-    flux_integ = flux.integrate(**integargs)
-    out = np.sum(w2_over_ngen * flux_samples) / (solid_angle * flux_integ)
-    if year_to_second:
-        out /= 365.25 * 24 * 60 * 60
-    return out
+def effective_area(self, flux, w2, ene, n_gen_total,
+                   angle_elem=4 * np.pi):
+    seconds_in_a_year = 365.25 * 24 * 60 * 60
+    n_gen_total = 1e6
+    aeff = flux * w2 / (n_gen_total * angle_elem * seconds_in_a_year)
+    return aeff
