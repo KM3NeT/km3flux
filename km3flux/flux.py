@@ -10,14 +10,15 @@ from scipy.integrate import romberg, simps
 from scipy.interpolate import splrep, splev, RectBivariateSpline
 
 from km3pipe.mc import name2pdg, pdg2name
-from km3flux.data import (HONDAFILE, DM_GC_FLAVORS, DM_GC_CHANNELS,
+from km3flux.data import (HONDAFILE, DM_GC_FLAVORS, DM_GC_CHANNELS,     # noqa
                           DM_GC_MASSES, DM_GC_FILE, WIMPSIM_FILE,
                           WIMPSIM_FLAVORS, WIMPSIM_INTERESTING_CHANNELS,
                           WIMPSIM_MASSES,
                           #dm_gc_spectrum, dm_sun_spectrum,
                           # DM_SUN_FLAVORS, DM_SUN_CHANNELS, DM_SUN_MASSES
                          )
-from km3pipe.tools import issorted, bincenters
+from km3pipe.tools import issorted
+from km3pipe.plot import bincenters
 
 FLAVORS = ('nu_e', 'anu_e', 'nu_mu', 'anu_mu')
 MCTYPES = [name2pdg(name) for name in FLAVORS]
@@ -393,7 +394,7 @@ class WimpSimFlux(BaseFlux):
 
     @property
     def points(self):
-        return self.x_energy, self.flux
+        return self.x_energy, self.dnde
 
     def _check_energy(self, ene, epsilon=0.0001):
         if np.any(ene > self.mass + epsilon):
@@ -407,23 +408,42 @@ class WimpSimFlux(BaseFlux):
             (self.tab.chan_num == 11) &
             (np.isclose(self.tab.mass, 1000.0))
         ]
-        flux = tab[flavor]
+        dnde = tab[flavor]
         self.x_energy = tab['energy']
         self.avinterpol = splrep(
             self.x_energy,
-            self.flux,
+            self.dnde,
         )
         energy = np.atleast_1d(energy)
         energy = self._check_energy(energy)
-        flux = splev(energy, self.avinterpol)
-        return flux
+        dnde = splev(energy, self.avinterpol)
+        return self.dnde2flux(dnde, self.mass)
 
     def _averaged(self, *args, **kwargs):
         return self(*args, **kwargs)
 
     def _with_zenith(self, energy, zenith, interpolate=True):
-        logger.debug("Interpolate? {}".format(interpolate))
-        logging.warning('No zenith dependent flux implemented! '
-                        'Falling back to averaged flux.'
-                       )
-        return self._averaged(self, energy)
+        raise NotImplementedError
+
+    @staticmethod
+    def dnde2flux(dnde, mass):
+        """Expects Neutrinos at detector,
+
+        Input units are `cm^-2 annihilation^-1`.
+
+        Output is / (m^2 sec sr GeV)
+        """
+        # dN/dz comes out of WS
+        # y = dN/dz = MDM * (dN/dE)
+        # gamm = (1e14/sec) * (100GeV/m_dm)^2 * (4*pi*r_suntoearth)
+        # -> [GeV m^2 sr s/yr]
+        # geom fact in wimpsim = 1/(4pi * r_sun_to_earth)
+        # -> geom fact already included (if using "yields at detector" table)
+        # -> gamma = 1e14 * (100/m)^2
+        # i don't get the 1e9 ???
+        # bah whatever
+        flux = (dnde / mass) * 1e14 * 1e9 * np.square(100 / mass)
+        flux *= 1e4     # cm2 -> m2
+        #gseagen:
+        #pointsource, so the I_0 = 1 (no 1/sr)
+        return flux
