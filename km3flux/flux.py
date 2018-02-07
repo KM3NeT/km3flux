@@ -404,6 +404,7 @@ class WimpSimFlux(BaseFlux):
     def __call__(self, energy, interpolate=True,
                  flavor='nu_mu', mass=1000.0, channel='W+ W-',
                 ):
+        self.mass = mass
         tab = self.tab[
             (self.tab.chan_num == 11) &
             (np.isclose(self.tab.mass, 1000.0))
@@ -412,7 +413,7 @@ class WimpSimFlux(BaseFlux):
         self.x_energy = tab['energy']
         self.avinterpol = splrep(
             self.x_energy,
-            self.dnde,
+            dnde,
         )
         energy = np.atleast_1d(energy)
         energy = self._check_energy(energy)

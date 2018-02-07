@@ -3,7 +3,7 @@ from unittest import TestCase
 import numpy as np
 
 from km3flux.flux import (BaseFlux, Honda2015, HondaSarcevic,
-                          DarkMatterFlux, AllFlavorFlux
+                          DarkMatterFlux, AllFlavorFlux, WimpSimFlux
                           )     # noqa
 # from km3flux.data import dm_gc_spectrum
 
@@ -123,6 +123,27 @@ class TestDMFlux(TestCase):
 #              x, y = dm_gc_spectrum('nu_mu', 'crazy', '90')
 #          with self.assertRaises(KeyError):
 #              x, y = dm_gc_spectrum('nu_mu', 'b', '90000000000')
+
+
+class TestWimpSim(TestCase):
+    def setUp(self):
+        self.flux = WimpSimFlux()
+        assert self.flux is not None
+
+    def test_flux(self):
+        dmf = self.flux
+        dmf([3])
+        dmf([20])
+        with self.assertRaises(ValueError):
+            dmf([9999])
+        dmf([18])
+        energy = np.array([3, 20, 18, 2, 4, 50, 28])
+        dmf(energy)
+        risky_energy = np.array([3, 20, 18, 2, 4, 50, 28, 90])
+        dmf(risky_energy)
+        bad_energy = np.array([3, 20, 18, 2, 4, 50, 28, 9999])
+        with self.assertRaises(ValueError):
+            dmf(bad_energy)
 
 
 class TestAllFlavorFlux(TestCase):
