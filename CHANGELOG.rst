@@ -3,11 +3,14 @@ Changelog
 
 Unreleased Changes
 ------------------
+
+0.3 (2018-03-19)
+----------------
 * add wimpsim fluxes
 * add convenience functions for adding fluxes to dataframes
 
-0.2.1 (2017-11-29
------------------
+0.2.1 (2017-11-29)
+------------------
 
 * replaces bugged (pre-histogrammed) cirelli tables with the tables
   taken directly from http://www.marcocirelli.net/PPPC4DMID.html
