@@ -14,7 +14,7 @@ from km3flux.data import (HONDAFILE, DM_GC_FLAVORS, DM_GC_CHANNELS,     # noqa
                           DM_GC_MASSES, DM_GC_FILE, WIMPSIM_FILE,
                           WIMPSIM_FLAVORS, WIMPSIM_INTERESTING_CHANNELS,
                           WIMPSIM_MASSES,
-                          #dm_gc_spectrum, dm_sun_spectrum,
+                          # dm_gc_spectrum, dm_sun_spectrum,
                           # DM_SUN_FLAVORS, DM_SUN_CHANNELS, DM_SUN_MASSES
                          )
 from km3pipe.tools import issorted
@@ -316,8 +316,7 @@ class DarkMatterFlux(BaseFlux):
     def _with_zenith(self, energy, zenith, interpolate=True):
         logger.debug("Interpolate? {}".format(interpolate))
         logging.warning('No zenith dependent flux implemented! '
-                        'Falling back to averaged flux.'
-                       )
+                        'Falling back to averaged flux.')
         return self._averaged(self, energy)
 
 
@@ -402,8 +401,7 @@ class WimpSimFlux(BaseFlux):
         return ene
 
     def __call__(self, energy, interpolate=True,
-                 flavor='nu_mu', mass=1000.0, channel='W+ W-',
-                ):
+                 flavor='nu_mu', mass=1000.0, channel='W+ W-',):
         self.mass = mass
         tab = self.tab[
             (self.tab.chan_num == 11) &
@@ -445,6 +443,35 @@ class WimpSimFlux(BaseFlux):
         # bah whatever
         flux = (dnde / mass) * 1e14 * 1e9 * np.square(100 / mass)
         flux *= 1e4     # cm2 -> m2
-        #gseagen:
-        #pointsource, so the I_0 = 1 (no 1/sr)
+        # gseagen:
+        # pointsource, so the I_0 = 1 (no 1/sr)
         return flux
+
+
+def add_honda(df):
+    flav = df.flavor.iloc[0]    # assume all equal (e.g. inside `groupby(flavor)`)
+    # (m^2 sec sr GeV)^-1
+    honda = Honda2015(flav)(energy=df.energy, zenith=df.zenith,
+                            interpolate=True)
+    df['honda'] = honda
+    return df
+
+
+def add_wimp(df, mass=1000.0, channel='W+ W-'):
+    flav = df.flavor.iloc[0]    # assume all equal (e.g. inside `groupby(flavor)`)
+    # (m^2 sec sr GeV)^-1
+    wimp = WimpSimFlux()(flavor=flav, energy=df.energy,
+                         mass=mass, channel=channel,
+                         interpolate=True)
+    df['wimpsim_{}_{}'.format(channel, mass)] = wimp
+    return df
+
+
+def apply_honda(df):
+    """Add Honda flux to a dataframe."""
+    return df.groupby(df.flavor).apply(add_honda)
+
+
+def apply_wimp(df, **kwargs):
+    """Add WimpSim flux to a dataframe."""
+    return df.groupby(df.flavor).apply(add_wimp, **kwargs)
