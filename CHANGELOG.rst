@@ -4,6 +4,8 @@ Changelog
 Unreleased Changes
 ------------------
 
+* fix bug in wimpsimflux choosing the wrong mass/channel
+
 0.3 (2018-03-19)
 ----------------
 * add wimpsim fluxes
@@ -45,7 +47,7 @@ Unreleased Changes
 * fix dependencies + docs
 
 0.10.2 / 2017-03-18
-------------------
+-------------------
 * initial versioned release
 * cleanup naming logic of fluxes (e.g. HondaFlux -> Honda2015)
 * add weight/aeff utils

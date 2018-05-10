@@ -13,7 +13,7 @@ from km3pipe.mc import name2pdg, pdg2name
 from km3flux.data import (HONDAFILE, DM_GC_FLAVORS, DM_GC_CHANNELS,     # noqa
                           DM_GC_MASSES, DM_GC_FILE, WIMPSIM_FILE,
                           WIMPSIM_FLAVORS, WIMPSIM_INTERESTING_CHANNELS,
-                          WIMPSIM_MASSES,
+                          WIMPSIM_MASSES, DM_SUN_CHAN_TRANS_INV
                           # dm_gc_spectrum, dm_sun_spectrum,
                           # DM_SUN_FLAVORS, DM_SUN_CHANNELS, DM_SUN_MASSES
                          )
@@ -401,11 +401,12 @@ class WimpSimFlux(BaseFlux):
         return ene
 
     def __call__(self, energy, interpolate=True,
-                 flavor='nu_mu', mass=1000.0, channel='W+ W-',):
+                 flavor='nu_mu', mass=1000.0, channel='w',):
         self.mass = mass
+        chan_num = int(DM_SUN_CHAN_TRANS_INV[channel])
         tab = self.tab[
-            (self.tab.chan_num == 11) &
-            (np.isclose(self.tab.mass, 1000.0))
+            (self.tab.chan_num == chan_num)
+            & (np.isclose(self.tab.mass, mass))
         ]
         dnde = tab[flavor]
         self.x_energy = tab['energy']
