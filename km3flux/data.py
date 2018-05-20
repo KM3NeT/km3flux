@@ -26,8 +26,17 @@ DM_SUN_MASSES = {'1000', '100', '10', '1500', '176', '150', '2000', '200',
 DM_SUN_FLAVORS = {'anu_mu', 'nu_mu'}
 DM_SUN_CHANNELS = {'11', '8', '5'}
 
-DM_SUN_CHAN_TRANS = {'8': 'w', '11': 'tau', '5': 'b'}
+DM_SUN_CHAN_TRANS = {
+    '8': 'w',
+    '11': 'tau',
+    '5': 'b'
+}
 DM_SUN_CHAN_TRANS_INV = {v: k for k, v in DM_SUN_CHAN_TRANS.items()}
+DM_SUN_CHAN_TRANS_INV.update({
+    'W+ W-': '8',
+    'tau- tau+': '11',
+    'b b-bar': '5',
+})
 
 WIMPSIM_CHANNELS = {
     1: 'd d-bar',
@@ -140,7 +149,7 @@ def wimpsim_read_file(fname):
     df['mass'] = mass
     df['energy'] = df['mass'] * df['z']
     df['chan_num'] = chan
-    #df['channel'] = CHANNELS[chan]
+    # df['channel'] = CHANNELS[chan]
     return df
 
 
