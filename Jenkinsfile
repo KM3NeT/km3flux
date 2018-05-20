@@ -4,6 +4,8 @@ DOCKER_IMAGES = ["python:3.6.5"]
 CHAT_CHANNEL = '#km3py'
 DEVELOPERS = ['mlotze@km3net.de']
 
+properties([gitLabConnection('KM3NeT GitLab')])
+
 
 def get_stages(docker_image) {
     stages = {
@@ -29,111 +31,129 @@ def get_stages(docker_image) {
                     pip install -U pip setuptools wheel
                 """
             }
-            stage("Build") {
-                // sendMail("Build Started", "halleluja")
-                try { 
-                    sh """
-                        . ${PYTHON_VENV}/bin/activate
-                        make
-                    """
-                } catch (e) { 
-                    sendChatMessage("Build Failed")
-                    throw e
+            gitlabBuilds(builds: ['Deps', 'Test', 'Install', 'Test KM3Modules', 'Test Reports', 'Coverage', 'Docs']) {
+                stage("Deps") {
+                    gitlabCommitStatus("Deps") {
+                        try { 
+                            sh """
+                                . ${PYTHON_VENV}/bin/activate
+                                make dependencies
+                            """
+                        } catch (e) { 
+                            sendChatMessage("Install Dependencies Failed")
+                            sendMail("Install Dependencies Failed")
+                            throw e
+                        }
+                    }
                 }
-            }
-            stage("Deps") {
-                try { 
-                    sh """
-                        . ${PYTHON_VENV}/bin/activate
-                        make dependencies
-                    """
-                } catch (e) { 
-                    sendChatMessage("Install Dependencies Failed")
-                    throw e
+                stage('Test') {
+                    gitlabCommitStatus("Test") {
+                        try { 
+                            sh """
+                                . ${PYTHON_VENV}/bin/activate
+                                make clean
+                                make test
+                            """
+                        } catch (e) { 
+                            sendChatMessage("Test Suite Failed")
+                            sendMail("Test Suite Failed")
+                            throw e
+                        }
+                    }
                 }
-            }
-            stage("Doc Deps") {
-                try { 
-                    sh """
-                        . ${PYTHON_VENV}/bin/activate
-                        make doc-dependencies
-                    """
-                } catch (e) { 
-                    sendChatMessage("Install Doc Dependencies Failed")
-                    throw e
+                stage("Install") {
+                    gitlabCommitStatus("Install") {
+                        try { 
+                            sh """
+                                . ${PYTHON_VENV}/bin/activate
+                                make install
+                            """
+                        } catch (e) { 
+                            sendChatMessage("Install Failed")
+                            sendMail("Install Failed")
+                            throw e
+                        }
+                    }
                 }
-            }
-            stage("Dev Deps") {
-                try { 
-                    sh """
-                        . ${PYTHON_VENV}/bin/activate
-                        make dev-dependencies
-                    """
-                } catch (e) { 
-                    sendChatMessage("Install Dev Dependencies Failed")
-                    throw e
+                stage('Test KM3Modules') {
+                    gitlabCommitStatus("Test KM3Modules") {
+                        try { 
+                            sh """
+                                . ${PYTHON_VENV}/bin/activate
+                                make test-km3modules
+                            """
+                        } catch (e) { 
+                            sendChatMessage("KM3Modules Test Suite Failed")
+                            sendMail("KM3Modules Test Suite Failed")
+                            throw e
+                        }
+                    }
                 }
-            }
-            stage('Test') {
-                try { 
-                    sh """
-                        . ${PYTHON_VENV}/bin/activate
-                        make clean
-                        make test
-                    """
-                    junit 'junit.xml'
-                    archive 'junit.xml'
-                } catch (e) { 
-                    sendChatMessage("Test Suite Failed")
-                    throw e
+                stage('Test Reports') {
+                    gitlabCommitStatus("Test Reports") {
+                        try { 
+                            step([$class: 'XUnitBuilder',
+                                thresholds: [
+                                    [$class: 'SkippedThreshold', failureThreshold: '0'],
+                                    [$class: 'FailedThreshold', failureThreshold: '0']],
+                                // thresholds: [[$class: 'FailedThreshold', unstableThreshold: '1']],
+                                tools: [[$class: 'JUnitType', pattern: 'reports/*.xml']]])
+                        } catch (e) { 
+                            sendChatMessage("Failed to create test reports.")
+                            sendMail("Failed to create test reports.")
+                            throw e
+                        }
+                    }
                 }
-            }
-            stage("Install") {
-                try { 
-                    sh """
-                        . ${PYTHON_VENV}/bin/activate
-                        make install
-                    """
-                } catch (e) { 
-                    sendChatMessage("Install Failed")
-                    throw e
+                stage('Coverage') {
+                    gitlabCommitStatus("Coverage") {
+                        try { 
+                            sh """
+                                . ${PYTHON_VENV}/bin/activate
+                                make clean
+                                make test-cov
+                            """
+                            step([$class: 'CoberturaPublisher',
+                                    autoUpdateHealth: false,
+                                    autoUpdateStability: false,
+                                    coberturaReportFile: 'reports/coverage.xml',
+                                    failNoReports: false,
+                                    failUnhealthy: false,
+                                    failUnstable: false,
+                                    maxNumberOfBuilds: 0,
+                                    onlyStable: false,
+                                    sourceEncoding: 'ASCII',
+                                    zoomCoverageChart: false])
+                            publishHTML target: [
+                               allowMissing: false,
+                               alwaysLinkToLastBuild: false,
+                               keepAll: true,
+                               reportDir: 'reports/coverage',
+                               reportFiles: 'index.html',
+                               reportName: 'Coverage'
+                            ]
+                        } catch (e) { 
+                            sendChatMessage("Coverage Failed")
+                            sendMail("Coverage Failed")
+                            throw e
+                        }
+                    }
                 }
-            }
-            stage('Coverage') {
-                try { 
-                    sh """
-                        . ${PYTHON_VENV}/bin/activate
-                        make clean
-                        make test-cov
-                    """
-                    step([$class: 'CoberturaPublisher',
-                            autoUpdateHealth: false,
-                            autoUpdateStability: false,
-                            coberturaReportFile: 'coverage.xml',
-                            failNoReports: false,
-                            failUnhealthy: false,
-                            failUnstable: false,
-                            maxNumberOfBuilds: 0,
-                            onlyStable: false,
-                            sourceEncoding: 'ASCII',
-                            zoomCoverageChart: false])
-                } catch (e) { 
-                    sendChatMessage("Coverage Failed")
-                    throw e
-                }
-            }
-            stage('Docs') {
-                try { 
-                    sh """
-                        . ${PYTHON_VENV}/bin/activate
-                        make doc-dependencies
-                        cd doc
-                        export MPLBACKEND="agg"
-                        make html
-                    """
-                } catch (e) { 
-                    sendChatMessage("Building Docs Failed")
-                    throw e
+                stage('Docs') {
+                    gitlabCommitStatus("Docs") {
+                        try { 
+                            sh """
+                                . ${PYTHON_VENV}/bin/activate
+                                cd doc
+                                export MPLBACKEND="agg"
+                                make html
+                            """
+                        } catch (e) { 
+                            sendChatMessage("Building Docs Failed")
+                            sendMail("Building Docs Failed")
+                            throw e
+                        }
+                    }
                 }
             }
             stage('Publishing Docs') {
@@ -148,6 +168,7 @@ def get_stages(docker_image) {
                    ]
                 } catch (e) {
                     sendChatMessage("Publishing Docs Failed")
+                    sendMail("Publishing Docs Failed")
                 }
             }
 
@@ -160,6 +181,7 @@ def get_stages(docker_image) {
 
 node('master') {
 
+    cleanWs()
     checkout scm
 
     def stages = [:]
@@ -176,14 +198,15 @@ def sendChatMessage(message, channel=CHAT_CHANNEL) {
     rocketSend channel: channel, message: "${message} - [Build ${env.BUILD_NUMBER} ](${env.BUILD_URL})"
 }
 
-def sendMail(subject, message, developers=DEVELOPERS) {
+
+def sendMail(subject, message='', developers=DEVELOPERS) {
     for (int i = 0; i < developers.size(); i++) {
         def developer = DEVELOPERS[i]
         emailext (
             subject: "$subject - Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
             body: """
-                <p>message</p>
-                <p><a href ='${env.BUILD_URL}'>${env.BUILD_URL}</a></p>
+                <p>$message</p>
+                <p>Check console output at <a href ='${env.BUILD_URL}'>${env.BUILD_URL}</a> to view the results.</p>
             """,
             to: developer
         )    
