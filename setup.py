@@ -4,6 +4,9 @@
 from setuptools import setup
 from km3flux import __version__
 
+with open('requirements.txt') as fobj:
+        requirements = [l.strip() for l in fobj.readlines()]
+
 setup(
     name='km3flux',
     version=__version__,
@@ -14,14 +17,5 @@ setup(
     license='MIT',
     packages=['km3flux', ],
     include_package_data=True,
-    install_requires=[
-        'numpy',
-        'scipy>=0.19',
-        'h5py',
-        'docopt',
-        'matplotlib>=2.0',
-        'pandas',
-        'tables',
-        'km3pipe[full]>=7.3.2'
-    ]
+    install_requires=requirements,
 )
