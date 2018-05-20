@@ -1,4 +1,4 @@
-PKGNAME=km3pipe
+PKGNAME=km3flux
 ALLNAMES = $(PKGNAME)
 
 default: build
