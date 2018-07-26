@@ -73,3 +73,5 @@ doc/api
 
 .pytest_cache/
 junit.xml
+.mypy_cache
+km3flux/data

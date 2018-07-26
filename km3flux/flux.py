@@ -10,13 +10,20 @@ from scipy.integrate import romberg, simps
 from scipy.interpolate import splrep, splev, RectBivariateSpline
 
 from km3pipe.mc import name2pdg, pdg2name
-from km3flux.data import (HONDAFILE, DM_GC_FLAVORS, DM_GC_CHANNELS,     # noqa
-                          DM_GC_MASSES, DM_GC_FILE, WIMPSIM_FILE,
-                          WIMPSIM_FLAVORS, WIMPSIM_INTERESTING_CHANNELS,
-                          WIMPSIM_MASSES, DM_SUN_CHAN_TRANS_INV
-                          # dm_gc_spectrum, dm_sun_spectrum,
-                          # DM_SUN_FLAVORS, DM_SUN_CHANNELS, DM_SUN_MASSES
-                         )
+from km3flux.data import (
+    HONDAFILE,
+    DM_GC_FLAVORS,
+    DM_GC_CHANNELS,    # noqa
+    DM_GC_MASSES,
+    DM_GC_FILE,
+    WIMPSIM_FILE,
+    WIMPSIM_FLAVORS,
+    WIMPSIM_INTERESTING_CHANNELS,
+    WIMPSIM_MASSES,
+    DM_SUN_CHAN_TRANS_INV
+    # dm_gc_spectrum, dm_sun_spectrum,
+    # DM_SUN_FLAVORS, DM_SUN_CHANNELS, DM_SUN_MASSES
+)
 from km3pipe.tools import issorted
 from km3pipe.plot import bincenters
 
@@ -53,6 +60,7 @@ class BaseFlux(object):
     array([2.29920000e-01, 2.34160000e-02, 2.99460000e-03,
            3.77690000e-04, 6.87310000e-05])
     """
+
     def __init__(self, **kwargs):
         pass
 
@@ -67,8 +75,8 @@ class BaseFlux(object):
         if len(zenith) != len(energy):
             raise ValueError("Zenith and energy need to have the same length.")
         logger.debug("Zenith available, using angle-dependent table...")
-        return self._with_zenith(energy=energy, zenith=zenith,
-                                 interpolate=interpolate)
+        return self._with_zenith(
+            energy=energy, zenith=zenith, interpolate=interpolate)
 
     def _averaged(self, energy, interpolate=True):
         logger.debug("Interpolate? {}".format(interpolate))
@@ -78,12 +86,22 @@ class BaseFlux(object):
         logger.debug("Interpolate? {}".format(interpolate))
         raise NotImplementedError
 
-    def integrate(self, zenith=None, emin=1, emax=100, interpolate=True, **integargs):
+    def integrate(self,
+                  zenith=None,
+                  emin=1,
+                  emax=100,
+                  interpolate=True,
+                  **integargs):
         logger.debug("Interpolate? {}".format(interpolate))
         return romberg(self, emin, emax, vec_func=True, **integargs)
 
-    def integrate_samples(self, energy, zenith=None, emin=1, emax=100,
-                          interpolate=True, **integargs):
+    def integrate_samples(self,
+                          energy,
+                          zenith=None,
+                          emin=1,
+                          emax=100,
+                          interpolate=True,
+                          **integargs):
         logger.debug("Interpolate? {}".format(interpolate))
         energy = np.atleast_1d(energy)
         mask = (emin <= energy) & (energy <= emax)
@@ -98,6 +116,7 @@ class BaseFlux(object):
 
 class PowerlawFlux(BaseFlux):
     """E^-gamma flux."""
+
     def __init__(self, gamma=2, scale=1e-4):
         self.gamma = gamma
         self.scale = scale
@@ -137,6 +156,7 @@ class Honda2015(BaseFlux):
     integrate_samples(energy, zenith=None, emin=1, emax=100)
         Integrate the flux from given samples, via simpson integration.
     """
+
     def __init__(self, flavor='nu_mu'):
         self.table = None
         self.avtable = None
@@ -161,11 +181,8 @@ class Honda2015(BaseFlux):
             self.energy_bincenters,
             self.avtable,
         )
-        self.interpol = RectBivariateSpline(
-            self.cos_zen_bincenters,
-            self.energy_bincenters,
-            self.table
-        )
+        self.interpol = RectBivariateSpline(self.cos_zen_bincenters,
+                                            self.energy_bincenters, self.table)
 
     def _averaged(self, energy, interpolate=True):
         logger.debug("Interpolate? {}".format(interpolate))
@@ -199,6 +216,7 @@ class HondaSarcevic(BaseFlux):
     """
     Get Honda + Sarcevic atmospheric neutrino fluxes.
     """
+
     def __init__(self, flavor='nu_mu'):
         self.table = None
         self.avtable = None
@@ -342,7 +360,11 @@ class AllFlavorFlux():
         for flav in FLAVORS:
             self.flux_flavors[flav] = fluxclass(flav)
 
-    def __call__(self, energy, zenith=None, flavor=None, mctype=None,
+    def __call__(self,
+                 energy,
+                 zenith=None,
+                 flavor=None,
+                 mctype=None,
                  interpolate=True):
         """mctype is ignored if flavor is passed as arg."""
         if mctype is None and flavor is None:
@@ -359,8 +381,8 @@ class AllFlavorFlux():
             where = flavor == flav
             if zenith is not None:
                 loczen = zenith[where]
-            flux = self.flux_flavors[flav](energy[where], loczen,
-                                           interpolate=interpolate)
+            flux = self.flux_flavors[flav](
+                energy[where], loczen, interpolate=interpolate)
             out[where] = flux
         return out
 
@@ -386,6 +408,7 @@ class WimpSimFlux(BaseFlux):
 
     All energies in GeV.
     """
+
     def __init__(self, filename=None):
         if filename is None:
             filename = WIMPSIM_FILE
@@ -400,14 +423,18 @@ class WimpSimFlux(BaseFlux):
             raise ValueError('Energies exceed parent mass!')
         return ene
 
-    def __call__(self, energy, interpolate=True,
-                 flavor='nu_mu', mass=1000.0, channel='w',):
+    def __call__(
+            self,
+            energy,
+            interpolate=True,
+            flavor='nu_mu',
+            mass=1000.0,
+            channel='w',
+    ):
         self.mass = mass
         chan_num = int(DM_SUN_CHAN_TRANS_INV[channel])
-        tab = self.tab[
-            (self.tab.chan_num == chan_num)
-            & (np.isclose(self.tab.mass, mass))
-        ]
+        tab = self.tab[(self.tab.chan_num == chan_num)
+                       & (np.isclose(self.tab.mass, mass))]
         dnde = tab[flavor]
         self.x_energy = tab['energy']
         self.avinterpol = splrep(
@@ -443,27 +470,32 @@ class WimpSimFlux(BaseFlux):
         # i don't get the 1e9 ???
         # bah whatever
         flux = (dnde / mass) * 1e14 * 1e9 * np.square(100 / mass)
-        flux *= 1e4     # cm2 -> m2
+        flux *= 1e4    # cm2 -> m2
         # gseagen:
         # pointsource, so the I_0 = 1 (no 1/sr)
         return flux
 
 
 def add_honda(df):
-    flav = df.flavor.iloc[0]    # assume all equal (e.g. inside `groupby(flavor)`)
+    # assume all equal (e.g. inside `groupby(flavor)`)
+    flav = df.flavor.iloc[0]
     # (m^2 sec sr GeV)^-1
-    honda = Honda2015(flav)(energy=df.energy, zenith=df.zenith,
-                            interpolate=True)
+    honda = Honda2015(flav)(
+        energy=df.energy, zenith=df.zenith, interpolate=True)
     df['honda'] = honda
     return df
 
 
 def add_wimp(df, mass=1000.0, channel='W+ W-'):
-    flav = df.flavor.iloc[0]    # assume all equal (e.g. inside `groupby(flavor)`)
+    # assume all equal (e.g. inside `groupby(flavor)`)
+    flav = df.flavor.iloc[0]
     # (m^2 sec sr GeV)^-1
-    wimp = WimpSimFlux()(flavor=flav, energy=df.energy,
-                         mass=mass, channel=channel,
-                         interpolate=True)
+    wimp = WimpSimFlux()(
+        flavor=flav,
+        energy=df.energy,
+        mass=mass,
+        channel=channel,
+        interpolate=True)
     df['wimpsim_{}_{}'.format(channel, mass)] = wimp
     return df
 
