@@ -12,11 +12,11 @@ pytest
 pytest-cov
 pytest-flake8
 scipy
-sphinx-gallery==0.1.12
-sphinx-rtd-theme==0.2.4
-sphinx==1.6.3
-sphinxcontrib-napoleon==0.6.1
-sphinxcontrib-programoutput==0.11
-sphinxcontrib-websupport==1.0.1
+sphinx-gallery
+sphinx-rtd-theme
+sphinx
+sphinxcontrib-napoleon
+sphinxcontrib-programoutput
+sphinxcontrib-websupport
 tables
 twine
