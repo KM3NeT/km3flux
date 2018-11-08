@@ -62,15 +62,6 @@ def get_stages(dockerfile) {
                             }
                             try { 
                                 sh """
-                                    make test-km3modules
-                                """
-                            } catch (e) { 
-                                sendChatMessage("KM3Modules Test Suite (${DOCKER_NAME}) Failed")
-                                sendMail("KM3Modules Test Suite (${DOCKER_NAME}) Failed")
-                                throw e
-                            }
-                            try { 
-                                sh """
                                     make clean
                                     make test-cov
                                 """
