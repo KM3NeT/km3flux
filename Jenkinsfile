@@ -1,155 +1,90 @@
 #!groovy
-import groovy.io.FileType
-import static groovy.io.FileType.FILES
-
-DOCKER_FILES_DIR = './dockerfiles'
-CHAT_CHANNEL = '#km3py'
-DEVELOPERS = ['mlotze@km3net.de']
-MAIN_DOCKER = 'py365'
+DEVELOPERS = ['tgal@km3net.de']
 
 properties([gitLabConnection('KM3NeT GitLab')])
 
 
-def get_stages(dockerfile) {
-    stages = {
-
-        // Bug in Jenkins prevents using custom folder in docker.build
-        def customImage = ''
-        dir("${DOCKER_FILES_DIR}"){
-            customImage = docker.build("km3py:${env.BUILD_ID}",
-                                       "-f ${dockerfile} .")
-        }
-
-        customImage.inside("-u root:root") {
-
-            // The following line causes a weird issue, where pip tries to 
-            // install into /usr/local/... instead of the virtual env.
-            // Any help figuring out what's happening is appreciated.
-            //
-            // def PYTHON_VENV = docker_image.replaceAll('[:.]', '') + 'venv'
-            //
-            // So we set it to 'venv' for all parallel builds now
-            def DOCKER_NAME = dockerfile
-            def DOCKER_HOME = env.WORKSPACE + '/' + DOCKER_NAME + '_home'
-            withEnv(["HOME=${env.WORKSPACE}", "MPLBACKEND=agg", "DOCKER_NAME=${DOCKER_NAME}"]){
-                gitlabBuilds(builds: ["Install (${DOCKER_NAME})", "Test (${DOCKER_NAME})", "Docs (${DOCKER_NAME})"]) {
-                    stage("Install (${DOCKER_NAME})") {
-                        gitlabCommitStatus("Install (${DOCKER_NAME})") {
-                            try { 
-                                sh """
-                                    pip install -U pip setuptools wheel
-                                    make dependencies
-                                    make install
-                                """
-                            } catch (e) { 
-                                sendChatMessage("Install (${DOCKER_NAME}) Failed")
-                                sendMail("Install (${DOCKER_NAME}) Failed")
-                                throw e
-                            }
-                        }
-                    }
-                    stage("Test (${DOCKER_NAME})") {
-                        gitlabCommitStatus("Test (${DOCKER_NAME})") {
-                            try { 
-                                sh """
-                                    make clean
-                                    make test
-                                """
-                            } catch (e) { 
-                                sendChatMessage("Test Suite (${DOCKER_NAME}) Failed")
-                                sendMail("Test Suite (${DOCKER_NAME}) Failed")
-                                throw e
-                            }
-                            try { 
-                                sh """
-                                    make clean
-                                    make test-cov
-                                """
-                                if(DOCKER_NAME == MAIN_DOCKER) {
-                                    step([$class: 'CoberturaPublisher',
-                                            autoUpdateHealth: false,
-                                            autoUpdateStability: false,
-                                            coberturaReportFile: "reports/coverage${DOCKER_NAME}.xml",
-                                            failNoReports: false,
-                                            failUnhealthy: false,
-                                            failUnstable: false,
-                                            maxNumberOfBuilds: 0,
-                                            onlyStable: false,
-                                            sourceEncoding: 'ASCII',
-                                            zoomCoverageChart: false])
-                                }
-                            } catch (e) { 
-                                sendChatMessage("Coverage (${DOCKER_NAME}) Failed")
-                                sendMail("Coverage  (${DOCKER_NAME}) Failed")
-                                throw e
-                            }
-                        }
-                    }
-                    stage("Docs (${DOCKER_NAME})") {
-                        gitlabCommitStatus("Docs (${DOCKER_NAME})") {
-                            try { 
-                                sh """
-                                    cp -R doc doc_${DOCKER_NAME}
-                                    cd doc_${DOCKER_NAME}
-                                    make html
-                                """
-                            } catch (e) { 
-                                sendChatMessage("Building Docs (${DOCKER_NAME}) Failed")
-                                sendMail("Building Docs (${DOCKER_NAME}) Failed")
-                                throw e
-                            }
-                            publishHTML target: [
-                                allowMissing: false,
-                                alwaysLinkToLastBuild: false,
-                                keepAll: true,
-                                reportDir: "doc_${DOCKER_NAME}/_build/html",
-                                reportFiles: 'index.html',
-                                reportName: "Documentation (${DOCKER_NAME})"
-                            ]
-                        }
-                    }
-                }
-            }
-        }
-    }
-    return stages
-}
-
-
 node('master') {
 
-    cleanWs()
+    // cleanWs()    // unocmment to start with a clean workspace
     checkout scm
 
-    def TMP_FILENAME = ".docker_files_list"
-    sh "ls ${DOCKER_FILES_DIR} > ${TMP_FILENAME}"
-    def dockerfiles = readFile(TMP_FILENAME).split( "\\r?\\n" );
-    sh "rm -f ${TMP_FILENAME}"
+    def docker_image = docker.build("orchestra-container:${env.BUILD_ID}")
 
-    def stages = [:]
-    for (int i = 0; i < dockerfiles.size(); i++) {
-        def dockerfile = dockerfiles[i]
-        stages[dockerfile] = get_stages(dockerfile)
-    }
+    docker_image.inside {
+        // Tell GitLab which stages exist, so it can display them in the Web 
+        // GUI in advance.
+        gitlabBuilds(builds: ["build", "test", "doc"]) {
 
-    parallel stages
+            // Here are your stages...
 
-    stage("Reports") {
-        step([$class: 'XUnitBuilder',
-            thresholds: [
-                [$class: 'SkippedThreshold', failureThreshold: '15'],
-                [$class: 'FailedThreshold', failureThreshold: '0']],
-            // thresholds: [[$class: 'FailedThreshold', unstableThreshold: '1']],
-            tools: [[$class: 'JUnitType', pattern: 'reports/*.xml']]])
+            updateGitlabCommitStatus name: 'build', state: 'pending'
+            stage("build") {
+                try {
+                    sh """
+                        make install
+                    """
+                    updateGitlabCommitStatus name: 'build', state: 'success'
+                } catch (e) {
+                    sendMail("Build Failed")
+                    updateGitlabCommitStatus name: 'build', state: 'failed'
+                    throw e
+                }
+            }
+
+            updateGitlabCommitStatus name: 'test', state: 'pending'
+            stage("test") {
+                try {
+                    sh """
+                        make test
+                    """
+                    updateGitlabCommitStatus name: 'test', state: 'success'
+                } catch (e) {
+                    sendMail("Tests Failed")
+                    updateGitlabCommitStatus name: 'test', state: 'failed'
+                    throw e
+                }
+                step([$class: 'XUnitBuilder',
+                        thresholds: [
+                            [$class: 'SkippedThreshold', failureThreshold: '5'],
+                            [$class: 'FailedThreshold', failureThreshold: '0']
+                        ],
+                        tools: [
+                            [$class: 'JUnitType', pattern: 'reports/junit.xml']
+                        ]
+                    ]
+                )
+            }
+            updateGitlabCommitStatus name: 'doc', state: 'pending'
+            stage("doc") {
+              try { 
+                sh """
+                  cd doc
+                  make html
+                """
+              } catch (e) { 
+                sendChatMessage("Building Docs Failed")
+                sendMail("Building Docs Failed")
+                updateGitlabCommitStatus name: 'doc', state: 'failed'
+                throw e
+              }
+              publishHTML target: [
+                allowMissing: false,
+                alwaysLinkToLastBuild: false,
+                keepAll: true,
+                reportDir: "doc/_build/html",
+                reportFiles: 'index.html',
+                reportName: "Documentation"
+              ]
+              updateGitlabCommitStatus name: 'doc', state: 'success'
+            }
+
+        }
     }
 }
 
 
-def sendChatMessage(message, channel=CHAT_CHANNEL) {
-    rocketSend channel: channel, message: "${message} - [Build ${env.BUILD_NUMBER} ](${env.BUILD_URL})"
-}
-
-
+// Sends a mail to all developers defined at the top of this script.
 def sendMail(subject, message='', developers=DEVELOPERS) {
     for (int i = 0; i < developers.size(); i++) {
         def developer = DEVELOPERS[i]
@@ -157,10 +92,12 @@ def sendMail(subject, message='', developers=DEVELOPERS) {
             subject: "$subject - Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
             body: """
                 <p>$message</p>
-                <p>Check console output at <a href ='${env.BUILD_URL}'>${env.BUILD_URL}</a> to view the results.</p>
+                <p>Check console output at 
+                <a href ='${env.BUILD_URL}'>${env.BUILD_URL}</a> 
+                to view the results.</p>
             """,
             to: developer
-        )    
+        )
     }
 }
 
