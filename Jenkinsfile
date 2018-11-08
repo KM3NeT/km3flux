@@ -11,7 +11,7 @@ node('master') {
 
     def docker_image = docker.build("orchestra-container:${env.BUILD_ID}")
 
-    docker_image.inside {
+    docker_image.inside("-u root:root") {
         // Tell GitLab which stages exist, so it can display them in the Web 
         // GUI in advance.
         gitlabBuilds(builds: ["build", "test", "doc"]) {
