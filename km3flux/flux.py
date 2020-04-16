@@ -9,8 +9,9 @@ import pandas as pd
 from scipy.integrate import romberg, simps
 from scipy.interpolate import splrep, splev, RectBivariateSpline
 
-from km3pipe.mc import name2pdg, pdg2name
 from km3flux.data import (
+    pdg2name,
+    name2pdg,
     HONDAFILE,
     DM_GC_FLAVORS,
     DM_GC_CHANNELS,    # noqa
@@ -24,13 +25,22 @@ from km3flux.data import (
     # dm_gc_spectrum, dm_sun_spectrum,
     # DM_SUN_FLAVORS, DM_SUN_CHANNELS, DM_SUN_MASSES
 )
-from km3pipe.tools import issorted
-from km3pipe.plot import bincenters
 
 FLAVORS = ('nu_e', 'anu_e', 'nu_mu', 'anu_mu')
 MCTYPES = [name2pdg(name) for name in FLAVORS]
 
 logger = logging.getLogger(__name__)
+
+
+def bincenters(bins):
+    """Bincenters, assuming they are all equally spaced."""
+    bins = np.atleast_1d(bins)
+    return 0.5 * (bins[1:] + bins[:-1])
+
+
+def issorted(arr):
+    """Check if array is sorted."""
+    return np.all(np.diff(arr) >= 0)
 
 
 class BaseFlux(object):
@@ -304,7 +314,7 @@ class DarkMatterFlux(BaseFlux):
         self.channel = channel
         self.flavor = flavor
 
-        tab = pd.read_hdf(fname)
+        tab = pd.read_hdf(fname, "data")
         tab = tab[(tab.flavor == flavor) & (tab.mass_dm == mass)]
         self.flux = tab[channel].values
         self.x_energy = tab['energy']

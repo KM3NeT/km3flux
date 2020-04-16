@@ -6,9 +6,9 @@ flavors (e.g. neutrinos + mupage).
 from __future__ import division, absolute_import, print_function
 
 import numpy as np
-from km3pipe.mc import pdg2name
 
 from km3flux.flux import e2flux
+from km3flux.data import pdg2name
 
 
 def nu_wgt(w2, n_gen, adjust_orca_overlap=False, energy=None):

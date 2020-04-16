@@ -1,7 +1,6 @@
 docopt
 h5py
 ipython
-km3pipe[full]>=7.3.2
 matplotlib>=2.0
 mock
 numpy

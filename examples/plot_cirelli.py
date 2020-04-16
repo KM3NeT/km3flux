@@ -14,8 +14,6 @@ import numpy as np
 
 from km3flux.flux import DarkMatterFlux
 
-import km3pipe.style.moritz     # noqa
-
 #############################################################################
 # show available tables
 
