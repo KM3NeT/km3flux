@@ -4,6 +4,7 @@ Changelog
 Unreleased Changes
 ------------------
 
+* km3pipe dependency removed
 * fix bug in wimpsimflux choosing the wrong mass/channel
 
 0.3 (2018-03-19)
