@@ -4,6 +4,9 @@ Changelog
 Unreleased Changes
 ------------------
 
+1.0 (2020-04-17)
+----------------
+* version jump to 1.0 to clean up the versioning mess, starting over...
 * km3pipe dependency removed
 * fix bug in wimpsimflux choosing the wrong mass/channel
 
