@@ -19,6 +19,6 @@ Install the dependencies
 
 In your python env, do
 
-    pip install git+http://git.km3net.de/moritz/km3flux.git
+    pip install km3flux
 
 or just clone the git repository and install via ``pip install .``
