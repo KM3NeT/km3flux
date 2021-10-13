@@ -13,7 +13,7 @@ from km3flux.flux import AllFlavorFlux
 
 ##############################################
 # use a single function call for mixed flavors
-flavor = ['nu_mu', 'anu_mu', 'anu_mu']
+flavor = ["nu_mu", "anu_mu", "anu_mu"]
 ene = [10, 20, 30]
 zen = [1, 1.5, 2]
 

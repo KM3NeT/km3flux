@@ -18,11 +18,12 @@ def nu_wgt(w2, n_gen, adjust_orca_overlap=False, energy=None):
 
         // If energy in overlap region, divide by 2
         if(nu.E>3 && nu.E<5) weight /= 2;
-   """
+    """
     wgt = w2 / n_gen
     if adjust_orca_overlap and (energy is None):
-        raise ValueError("When correcting for orca overlap, you need "
-                         "to specify the energy.")
+        raise ValueError(
+            "When correcting for orca overlap, you need " "to specify the energy."
+        )
     if adjust_orca_overlap and (energy is not None):
         overlap_mask = (3 <= energy) & (energy <= 5)
         wgt[overlap_mask] /= 2
@@ -37,8 +38,15 @@ def atmu_wgt(livetime_sec, fill_blank=False, fill=60.0):
     return out
 
 
-def make_weights(w2, n_gen, livetime_sec, is_neutrino,
-                 adjust_orca_overlap=False, energy=None, fix_atmu=False):
+def make_weights(
+    w2,
+    n_gen,
+    livetime_sec,
+    is_neutrino,
+    adjust_orca_overlap=False,
+    energy=None,
+    fix_atmu=False,
+):
     """Generate weights for events of mixed flavor.
 
     This assumes that all arrays have the same length. If you have mixed
@@ -65,25 +73,27 @@ def make_weights(w2, n_gen, livetime_sec, is_neutrino,
         If `adjust_orca_overlap` is set, you need to pass this.
     """
     wgt = np.ones(len(w2))
-    wgt[is_neutrino] = nu_wgt(w2[is_neutrino], n_gen[is_neutrino],
-                              adjust_orca_overlap=adjust_orca_overlap,
-                              energy=energy)
-    wgt[~is_neutrino] = atmu_wgt(livetime_sec[~is_neutrino],
-                                 fill_blank=fix_atmu)
+    wgt[is_neutrino] = nu_wgt(
+        w2[is_neutrino],
+        n_gen[is_neutrino],
+        adjust_orca_overlap=adjust_orca_overlap,
+        energy=energy,
+    )
+    wgt[~is_neutrino] = atmu_wgt(livetime_sec[~is_neutrino], fill_blank=fix_atmu)
     return wgt
 
 
-def strange_flavor_to_mupage(flav, fill='mu+'):
-    mask = ((flav == 'N/A') | (flav == 'n'))
+def strange_flavor_to_mupage(flav, fill="mu+"):
+    mask = (flav == "N/A") | (flav == "n")
     flav[mask] = fill
     return flav
 
 
 def add_flavor(df, fix_strange_flavor=True):
     def t2f(row):
-        return pdg2name(row['type'])
+        return pdg2name(row["type"])
 
-    flavor = df.apply(t2f, axis=1).astype('str')
+    flavor = df.apply(t2f, axis=1).astype("str")
     if fix_strange_flavor:
         flavor = strange_flavor_to_mupage(flavor)
     return flavor
@@ -91,20 +101,25 @@ def add_flavor(df, fix_strange_flavor=True):
 
 def add_weights_and_fluxes(df, **kwargs):
     """Add weights + common fluxes."""
-    for k in ['weight_w2', 'n_events_gen', 'livetime_sec',
-              'is_neutrino', 'energy']:
+    for k in ["weight_w2", "n_events_gen", "livetime_sec", "is_neutrino", "energy"]:
         assert k in df.columns
-    df['flavor'] = add_flavor(df)
-    df['wgt'] = make_weights(df.weight_w2, df.n_events_gen, df.livetime_sec,
-                             df.is_neutrino, adjust_orca_overlap=True,
-                             energy=df.energy, **kwargs)
-    df['e2flux'] = e2flux(df.energy)
+    df["flavor"] = add_flavor(df)
+    df["wgt"] = make_weights(
+        df.weight_w2,
+        df.n_events_gen,
+        df.livetime_sec,
+        df.is_neutrino,
+        adjust_orca_overlap=True,
+        energy=df.energy,
+        **kwargs
+    )
+    df["e2flux"] = e2flux(df.energy)
     df = make_atmo_weight(df)
     return df
 
 
 def make_atmo_weight(df_):
-    df_['wgt_atmo'] = df_.wgt.copy()
-    hon = df_.honda[df_.flavor != 'mu+']
-    df_.loc[df_.flavor != 'mu+', 'wgt_atmo'] *= hon
+    df_["wgt_atmo"] = df_.wgt.copy()
+    hon = df_.honda[df_.flavor != "mu+"]
+    df_.loc[df_.flavor != "mu+", "wgt_atmo"] *= hon
     return df_

@@ -6,11 +6,6 @@ __pycache__/
 # C extensions
 *.so
 
-# Temporary Cython *.c files
-km3pipe/core.c
-km3pipe/dataclasses.c
-km3pipe/tools.c
-
 # Distribution / packaging
 .Python
 env/
@@ -75,3 +70,6 @@ doc/api
 junit.xml
 .mypy_cache
 km3flux/data
+
+# Version info
+km3flux/version.py

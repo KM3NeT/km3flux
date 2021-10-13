@@ -10,12 +10,12 @@ import km3flux
 
 
 PDG2NAME = {
-    12: 'nu_e',
-    -12: 'anu_e',
-    14: 'nu_mu',
-    -14: 'anu_mu',
-    16: 'nu_tau',
-    -16: 'anu_tau',
+    12: "nu_e",
+    -12: "anu_e",
+    14: "nu_mu",
+    -14: "anu_mu",
+    16: "nu_tau",
+    -16: "anu_tau",
 }
 
 
@@ -30,62 +30,116 @@ def name2pdg(name):
     return NAME2PDG[name]
 
 
-DATADIR = os.path.dirname(km3flux.__file__) + '/data'
-HONDAFILE = DATADIR + '/honda2015_frejus_solarmin.h5'
-WIMPSIM_FILE = DATADIR + '/wimpsim_1d.h5'
+DATADIR = os.path.dirname(km3flux.__file__) + "/data"
+HONDAFILE = DATADIR + "/honda2015_frejus_solarmin.h5"
+WIMPSIM_FILE = DATADIR + "/wimpsim_1d.h5"
 # DM_GC_FILE = DATADIR + '/gc_spectra.h5'
-DM_GC_FILE = DATADIR + '/cirelli_gc.h5'
-DM_GC_MASSES = {'100000', '260', '100', '5000', '360', '200', '10', '1000',
-                '750', '30000', '2000', '50', '10000', '180', '500', '150',
-                '3000', '25', '90', '1500'}
-DM_GC_FLAVORS = {'anu_mu', 'nu_mu'}
-DM_GC_CHANNELS = {'b', 'mu', 'tau', 'w'}
-
-DM_SUN_FILE = DATADIR + '/sun_spectra.h5'
-DM_SUN_MASSES = {'1000', '100', '10', '1500', '176', '150', '2000', '200',
-                 '250', '25', '3000', '350', '5000', '500', '50', '750'}
-DM_SUN_FLAVORS = {'anu_mu', 'nu_mu'}
-DM_SUN_CHANNELS = {'11', '8', '5'}
-
-DM_SUN_CHAN_TRANS = {
-    '8': 'w',
-    '11': 'tau',
-    '5': 'b'
+DM_GC_FILE = DATADIR + "/cirelli_gc.h5"
+DM_GC_MASSES = {
+    "100000",
+    "260",
+    "100",
+    "5000",
+    "360",
+    "200",
+    "10",
+    "1000",
+    "750",
+    "30000",
+    "2000",
+    "50",
+    "10000",
+    "180",
+    "500",
+    "150",
+    "3000",
+    "25",
+    "90",
+    "1500",
 }
+DM_GC_FLAVORS = {"anu_mu", "nu_mu"}
+DM_GC_CHANNELS = {"b", "mu", "tau", "w"}
+
+DM_SUN_FILE = DATADIR + "/sun_spectra.h5"
+DM_SUN_MASSES = {
+    "1000",
+    "100",
+    "10",
+    "1500",
+    "176",
+    "150",
+    "2000",
+    "200",
+    "250",
+    "25",
+    "3000",
+    "350",
+    "5000",
+    "500",
+    "50",
+    "750",
+}
+DM_SUN_FLAVORS = {"anu_mu", "nu_mu"}
+DM_SUN_CHANNELS = {"11", "8", "5"}
+
+DM_SUN_CHAN_TRANS = {"8": "w", "11": "tau", "5": "b"}
 DM_SUN_CHAN_TRANS_INV = {v: k for k, v in DM_SUN_CHAN_TRANS.items()}
-DM_SUN_CHAN_TRANS_INV.update({
-    'W+ W-': '8',
-    'tau- tau+': '11',
-    'b b-bar': '5',
-})
+DM_SUN_CHAN_TRANS_INV.update(
+    {
+        "W+ W-": "8",
+        "tau- tau+": "11",
+        "b b-bar": "5",
+    }
+)
 
 WIMPSIM_CHANNELS = {
-    1: 'd d-bar',
-    2: 'u u-bar',
-    3: 's s-bar',
-    4: 'c c-bar',
-    5: 'b b-bar',
-    6: 't t-bar',
-    7: 'glue glue',
-    8: 'W+ W-',
-    9: 'Z0 Z0',
-    10: 'mu- mu+',
-    11: 'tau- tau+',
-    12: 'nu_e nu_e-bar',
-    13: 'nu_mu nu_mu-bar',
-    14: 'nu_tau nu_tau-bar',
+    1: "d d-bar",
+    2: "u u-bar",
+    3: "s s-bar",
+    4: "c c-bar",
+    5: "b b-bar",
+    6: "t t-bar",
+    7: "glue glue",
+    8: "W+ W-",
+    9: "Z0 Z0",
+    10: "mu- mu+",
+    11: "tau- tau+",
+    12: "nu_e nu_e-bar",
+    13: "nu_mu nu_mu-bar",
+    14: "nu_tau nu_tau-bar",
 }
-WIMPSIM_FLAVORS = ['nu_e', 'anu_e', 'nu_mu', 'anu_mu', 'nu_tau', 'anu_tau']
+WIMPSIM_FLAVORS = ["nu_e", "anu_e", "nu_mu", "anu_mu", "nu_tau", "anu_tau"]
 WIMPSIM_INTERESTING_CHANNELS = {8, 11, 5}
 WIMPSIM_INTERESTING_CHANNELS.update(
-    {WIMPSIM_CHANNELS[c] for c in WIMPSIM_INTERESTING_CHANNELS})
-WIMPSIM_MASSES = [5.00e+02, 3.00e+00, 1.50e+03, 5.00e+03, 6.00e+00, 2.00e+03,
-                  1.50e+02, 7.50e+03, 2.50e+02, 9.12e+01, 1.00e+04, 1.00e+03,
-                  1.00e+01, 3.50e+02, 2.00e+02, 1.00e+02, 1.76e+02, 2.50e+01,
-                  7.50e+02, 8.03e+01, 3.00e+03, 5.00e+01]
+    {WIMPSIM_CHANNELS[c] for c in WIMPSIM_INTERESTING_CHANNELS}
+)
+WIMPSIM_MASSES = [
+    5.00e02,
+    3.00e00,
+    1.50e03,
+    5.00e03,
+    6.00e00,
+    2.00e03,
+    1.50e02,
+    7.50e03,
+    2.50e02,
+    9.12e01,
+    1.00e04,
+    1.00e03,
+    1.00e01,
+    3.50e02,
+    2.00e02,
+    1.00e02,
+    1.76e02,
+    2.50e01,
+    7.50e02,
+    8.03e01,
+    3.00e03,
+    5.00e01,
+]
 
 
-def dm_gc_spectrum(flavor='nu_mu', channel='w', mass='100', full_lims=False):
+def dm_gc_spectrum(flavor="nu_mu", channel="w", mass="100", full_lims=False):
     """Dark Matter spectra by M. Cirelli."""
     mass = str(mass)
     if mass not in DM_GC_MASSES:
@@ -96,16 +150,16 @@ def dm_gc_spectrum(flavor='nu_mu', channel='w', mass='100', full_lims=False):
         raise KeyError("Channel '{}' not available.".format(channel))
 
     fname = DM_GC_FILE
-    with h5py.File(fname, 'r') as h5:
+    with h5py.File(fname, "r") as h5:
         gr = h5[flavor][channel][mass]
-        counts = gr['entries'][:]
-        bins = gr['binlims'][:]
+        counts = gr["entries"][:]
+        bins = gr["binlims"][:]
     if not full_lims:
         bins = bins[:-1]
     return counts, bins
 
 
-def dm_sun_spectrum(flavor='nu_mu', channel='w', mass='100', full_lims=False):
+def dm_sun_spectrum(flavor="nu_mu", channel="w", mass="100", full_lims=False):
     """Dark Matter spectra by M. Cirelli."""
     chan_num = DM_SUN_CHAN_TRANS_INV[channel]
     mass = str(mass)
@@ -117,10 +171,10 @@ def dm_sun_spectrum(flavor='nu_mu', channel='w', mass='100', full_lims=False):
         raise KeyError("Channel '{}' not available.".format(channel))
 
     fname = DM_SUN_FILE
-    with h5py.File(fname, 'r') as h5:
+    with h5py.File(fname, "r") as h5:
         gr = h5[flavor][chan_num][mass]
-        counts = gr['entries'][:]
-        bins = gr['binlims'][:]
+        counts = gr["entries"][:]
+        bins = gr["binlims"][:]
     if not full_lims:
         bins = bins[:-1]
     return counts, bins
@@ -150,7 +204,7 @@ def wimpsim_parse_fname(fname):
     parent_mass, channel, n_dimensions
     """
     # example: './data/we-m10000-ch11-su-1D-diff-f1.dat'
-    _, mass, chan, _, dim, _, _ = os.path.basename(fname).split('-')
+    _, mass, chan, _, dim, _, _ = os.path.basename(fname).split("-")
     # 'm10000'
     mass = float(mass[1:])
     # 'ch11'
@@ -166,10 +220,11 @@ def wimpsim_read_file(fname):
         df = wimpsim_read_1d(fname)
     else:
         raise NotImplementedError(
-            'Only 1d tables supported, got ndim={}. Sorry!'.format(ndim))
-    df['mass'] = mass
-    df['energy'] = df['mass'] * df['z']
-    df['chan_num'] = chan
+            "Only 1d tables supported, got ndim={}. Sorry!".format(ndim)
+        )
+    df["mass"] = mass
+    df["energy"] = df["mass"] * df["z"]
+    df["chan_num"] = chan
     # df['channel'] = CHANNELS[chan]
     return df
 
@@ -177,10 +232,13 @@ def wimpsim_read_file(fname):
 def wimpsim_read_1d(fname):
     n_z_bins_1d = 100
     z_bins_1d = np.linspace(0.005, 0.995, n_z_bins_1d)
-    df = pd.read_csv(fname, delim_whitespace=True,
-                     comment='#', header=None,
-                     )
+    df = pd.read_csv(
+        fname,
+        delim_whitespace=True,
+        comment="#",
+        header=None,
+    )
     df = df.T
     df.columns = WIMPSIM_FLAVORS
-    df['z'] = z_bins_1d
+    df["z"] = z_bins_1d
     return df

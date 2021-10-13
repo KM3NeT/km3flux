@@ -2,9 +2,15 @@ from unittest import TestCase
 
 import numpy as np
 
-from km3flux.flux import (BaseFlux, Honda2015, HondaSarcevic,
-                          DarkMatterFlux, AllFlavorFlux, WimpSimFlux
-                          )     # noqa
+from km3flux.flux import (
+    BaseFlux,
+    Honda2015,
+    HondaSarcevic,
+    DarkMatterFlux,
+    AllFlavorFlux,
+    WimpSimFlux,
+)  # noqa
+
 # from km3flux.data import dm_gc_spectrum
 
 
@@ -82,11 +88,11 @@ class TestHondaSarcevic(TestCase):
 
 class TestDMFlux(TestCase):
     def test_init(self):
-        dmf = DarkMatterFlux(flavor='nu_mu', channel='w', mass=90)
+        dmf = DarkMatterFlux(flavor="nu_mu", channel="w", mass=90)
         assert dmf is not None
 
     def test_flux(self):
-        dmf = DarkMatterFlux(flavor='nu_mu', channel='w', mass=90)
+        dmf = DarkMatterFlux(flavor="nu_mu", channel="w", mass=90)
         dmf([3])
         dmf([20])
         with self.assertRaises(ValueError):
@@ -148,7 +154,7 @@ class TestWimpSim(TestCase):
 
 class TestAllFlavorFlux(TestCase):
     def setUp(self):
-        self.flavor = ['nu_mu', 'anu_mu', 'anu_mu']
+        self.flavor = ["nu_mu", "anu_mu", "anu_mu"]
         self.ene = [10, 20, 30]
         self.zen = [1, 1.5, 2]
 
