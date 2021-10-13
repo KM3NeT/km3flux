@@ -24,28 +24,24 @@ ene = np.logspace(0, 2, n_points)
 ##############################################
 # look at numu flux (binned vs interpolated)
 
-numu_flux = Honda2015('nu_mu')
-plt.plot(ene,
-         numu_flux(ene, interpolate=True), label='Interpolated'
-)
-plt.plot(ene,
-         numu_flux(ene, interpolate=False), label='Binned'
-)
-plt.yscale('log')
-plt.xscale('log')
+numu_flux = Honda2015("nu_mu")
+plt.plot(ene, numu_flux(ene, interpolate=True), label="Interpolated")
+plt.plot(ene, numu_flux(ene, interpolate=False), label="Binned")
+plt.yscale("log")
+plt.xscale("log")
 plt.legend()
 
 ##############################################
 # Plot vs energy, for multiple flavors,
 # interpolated by default
 
-flavors = {'nu_mu', 'anu_mu', 'nu_e', 'anu_e'}
+flavors = {"nu_mu", "anu_mu", "nu_e", "anu_e"}
 for flav in flavors:
     flux = Honda2015(flavor=flav)
     plt.plot(ene, flux(ene, interpolate=True), label=flav)
 
-plt.yscale('log')
-plt.xscale('log')
-plt.xlabel('Energy / GeV')
-plt.ylabel(r'Flux / (m$^2$ sec sr GeV)$^{-1}$')
+plt.yscale("log")
+plt.xscale("log")
+plt.xlabel("Energy / GeV")
+plt.ylabel(r"Flux / (m$^2$ sec sr GeV)$^{-1}$")
 plt.legend()

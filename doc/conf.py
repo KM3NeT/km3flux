@@ -58,15 +58,15 @@ autoapi_include_summaries = True
 # Gallery
 sphinx_gallery_conf = {
     "backreferences_dir": "modules/generated",
-    'abort_on_example_error': True,
+    "abort_on_example_error": True,
     "default_thumb_file": "_static/default_gallery_thumbnail.png",
     "examples_dirs": "../examples",  # path to your example scripts
     "gallery_dirs": "auto_examples",  # path to where to save gallery generated output
     "show_memory": False,
-    'reference_url': {
-        'km3astro': None,
-        'numpy': 'http://docs.scipy.org/doc/numpy',
-    }
+    "reference_url": {
+        "km3astro": None,
+        "numpy": "http://docs.scipy.org/doc/numpy",
+    },
 }
 
 # -- Options for HTML output -------------------------------------------------
