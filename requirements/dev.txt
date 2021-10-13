@@ -1,0 +1,14 @@
+mock
+ipython
+numpydoc
+pillow
+pytest
+pytest-cov
+pytest-flake8
+sphinx-gallery
+sphinx-rtd-theme
+sphinx
+sphinxcontrib-napoleon
+sphinxcontrib-programoutput
+sphinxcontrib-websupport
+twine
