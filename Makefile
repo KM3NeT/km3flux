@@ -1,51 +1,57 @@
 PKGNAME=km3flux
-ALLNAMES = $(PKGNAME)
 
 default: build
 
 all: install
 
-build: 
-	@echo "No need to build anymore :)"
-
-install: 
-	pip install -U numpy
+install:
 	pip install .
 
 install-dev:
-	pip install -U numpy
-	pip install -e .
+	pip install -e ".[dev]"
 
 clean:
 	python setup.py clean --all
-	rm -f $(PKGNAME)/*.cpp
-	rm -f $(PKGNAME)/*.c
-	rm -f -r build/
-	rm -f $(PKGNAME)/*.so
 
-test: 
-	py.test --junitxml=./reports/junit.xml $(PKGNAME)
+test:
+	py.test --junitxml=./reports/junit.xml -o junit_suite_name=$(PKGNAME) tests
 
 test-cov:
-	py.test --cov ./ --cov-report term-missing --cov-report xml:reports/coverage.xml --cov-report html:reports/coverage $(ALLNAMES)
+	py.test --cov ./$(PKGNAME) --cov-report term-missing --cov-report xml:reports/coverage.xml --cov-report html:reports/coverage tests
 
-test-loop: 
-	py.test
-	ptw --ext=.py,.pyx --ignore=doc
+test-loop:
+	py.test tests
+	ptw --ext=.py,.pyx --ignore=doc tests
 
-flake8: 
+flake8:
 	py.test --flake8
 
 pep8: flake8
 
-docstyle: 
+docstyle:
 	py.test --docstyle
 
-lint: 
+lint:
 	py.test --pylint
 
 dependencies:
-	pip install -U numpy
 	pip install -Ur requirements.txt
 
-.PHONY: all clean build install install-dev test test-km3modules test-nocov flake8 pep8 dependencies docstyle
+.PHONY: black
+black:
+	black --exclude '/_definitions/|version.py' $(PKGNAME)
+	black examples
+	black tests
+	black doc/conf.py
+	black setup.py
+
+.PHONY: black-check
+black-check:
+	black --check --exclude '/_definitions/|version.py' $(PKGNAME)
+	black --check examples
+	black --check tests
+	black --check doc/conf.py
+	black --check setup.py
+
+
+.PHONY: all clean install install-dev test  test-nocov flake8 pep8 dependencies docstyle black black-check
