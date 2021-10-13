@@ -1,6 +1,5 @@
 black==21.9b0
 ipython
-km3net-testdata>=0.2.26
 matplotlib
 memory_profiler
 mock
