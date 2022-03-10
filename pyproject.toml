@@ -2,4 +2,7 @@
 requires = ["setuptools>=42", "wheel", "setuptools_scm[toml]>=3.4"]
 
 [tool.setuptools_scm]
-write_to = "km3flux/version.py"
+write_to = "src/km3flux/version.py"
+
+[tool.isort]
+profile = "black"
