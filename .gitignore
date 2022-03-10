@@ -8,24 +8,14 @@ __pycache__/
 
 # Distribution / packaging
 .Python
-env/
-bin/
+venv/
 build/
 develop-eggs/
 dist/
 eggs/
-lib/
-lib64/
-parts/
 sdist/
-var/
 *.egg-info/
-.installed.cfg
 *.egg
-
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
 
 # Unit test / coverage reports
 htmlcov/
@@ -36,32 +26,11 @@ nosetests.xml
 coverage.xml
 reports
 
-# Translations
-*.mo
-
-# Mr Developer
-.mr.developer.cfg
-.project
-.pydevproject
-
-# Rope
-.ropeproject
-
-# Django stuff:
-*.log
-*.pot
-
 # Sphinx documentation
 doc/_build/
 doc/auto_examples/
 doc/modules/
 doc/api
-
-# VI swap files
-*.swp
-
-# PyCharm files
-.idea
 
 # jupyter files
 .ipynb_checkpoints/
@@ -69,7 +38,7 @@ doc/api
 .pytest_cache/
 junit.xml
 .mypy_cache
-km3flux/data
+src/km3flux/data
 
 # Version info
-km3flux/version.py
+src/km3flux/version.py
