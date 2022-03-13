@@ -4,7 +4,7 @@ Updates the files in the data folder by scraping the publications.
 Existing data files are not re-downloaded.
 
 Usage:
-    km3flux [-xsp] update
+    km3flux [-spx] update
     km3flux show
     km3flux (-h | --help)
     km3flux --version
