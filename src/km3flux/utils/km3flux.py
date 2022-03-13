@@ -4,14 +4,15 @@ Updates the files in the data folder by scraping the publications.
 Existing data files are not re-downloaded.
 
 Usage:
-    km3flux [-xs] update
+    km3flux [-xsp] update
     km3flux show
     km3flux (-h | --help)
     km3flux --version
 
 Options:
     -x    Overwrite existing files when updating.
-    -s    Include seasonal data from Honda when updating.
+    -s    Include seasonal flux data from Honda.
+    -p    Include production height tables from Honda.
     -h    Show this screen.
     -v    Show the version.
 
@@ -33,7 +34,7 @@ from km3flux.data import basepath
 URL = "https://www.icrr.u-tokyo.ac.jp/~mhonda/"
 
 
-def get_honda(include_seasonal=False, overwrite=False):
+def get_honda(include_seasonal=False, include_production_height=False, overwrite=False):
     """Grab all the Honda fluxes"""
 
     def archive_data(url, year, overwrite=False):
@@ -51,12 +52,12 @@ def get_honda(include_seasonal=False, overwrite=False):
             r = requests.get(url)
             fobj.write(r.content)
 
-    def get_all_data(url, year, overwrite=False):
+    def get_all_data(url, year, overwrite=False, label=""):
         """Downloads all the datafiles from a given `url`"""
         p = requests.get(url)
         s = BeautifulSoup(p.content, "html.parser")
         hrefs = [a["href"] for a in s.find_all("a") if a["href"].endswith(".d.gz")]
-        for href in tqdm(hrefs):
+        for href in tqdm(hrefs, label):
             data_url = urljoin(p.url, href)
             archive_data(data_url, year, overwrite)
 
@@ -69,8 +70,8 @@ def get_honda(include_seasonal=False, overwrite=False):
         m = re.search(r"(nflx(\d{4})/index.html)", e.attrs["href"])
         if m:
             suburl, year = m.groups()
-            print(f"  year {year}")
-            get_all_data(urljoin(page.url, suburl), year, overwrite)
+            print(f"-> year {year}")
+            get_all_data(urljoin(page.url, suburl), year, overwrite, "flux tables")
 
             if include_seasonal:
                 p = requests.get(urljoin(page.url, suburl))
@@ -80,16 +81,29 @@ def get_honda(include_seasonal=False, overwrite=False):
                     ms = re.search(r"index-\d{4}.html", _e.attrs["href"])
                     if ms:
                         suburl = urljoin(p.url, _e.attrs["href"])
-                        get_all_data(suburl, year, overwrite)
+                        get_all_data(suburl, year, overwrite, "seasonal fluxes")
+
+            if include_production_height:
+                p = requests.get(urljoin(page.url, suburl))
+                s = BeautifulSoup(p.content, "html.parser")
+                links = s.find_all("a")
+                for _e in links:
+                    ms = re.search(r"index-height.html", _e.attrs["href"])
+                    if ms:
+                        suburl = urljoin(p.url, _e.attrs["href"])
+                        get_all_data(
+                            suburl, year, overwrite, "production height tables"
+                        )
 
 
 def main():
     args = docopt(__doc__, version=km3flux.version)
 
-    overwrite = args["-x"]
-    include_seasonal = args["-s"]
-
-    get_honda(include_seasonal, overwrite)
+    get_honda(
+        include_seasonal=args["-x"],
+        include_production_height=args["-p"],
+        overwrite=args["-x"],
+    )
 
 
 if __name__ == "__main__":
