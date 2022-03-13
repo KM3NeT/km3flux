@@ -33,6 +33,8 @@ from km3flux.data import basepath
 
 URL = "https://www.icrr.u-tokyo.ac.jp/~mhonda/"
 
+log = km3flux.logger.get_logger("km3flux")
+
 
 def get_honda(include_seasonal=False, include_production_height=False, overwrite=False):
     """Grab all the Honda fluxes"""
@@ -50,6 +52,8 @@ def get_honda(include_seasonal=False, include_production_height=False, overwrite
         os.makedirs(target_path.parent, exist_ok=True)
         with open(target_path, "wb") as fobj:
             r = requests.get(url)
+            if not r.ok:
+                log.error("Unable to retrieve '%s', reason: '%s' (status code %d)", url, r.reason, r.status_code)
             fobj.write(r.content)
 
     def get_all_data(url, year, overwrite=False, label=""):

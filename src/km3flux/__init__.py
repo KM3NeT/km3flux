@@ -6,3 +6,4 @@ version = get_distribution(__name__).version
 # from .version import version as __version__
 
 import km3flux.flux
+import km3flux.logger
