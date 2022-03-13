@@ -40,3 +40,13 @@ class TestHonda(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             f = honda._filepath_for(2011, "Kamioka", "min", False, (1, 2), None)
+
+    def test_flux(self):
+        honda = km3flux.flux.Honda()
+        for year in [2006, 2011, 2014]:
+            for exp in ["Frejus", "Gran Sasso"]:
+                for sol in ["min", "max"]:
+                    for ave in [None, "all", "azimuth"]:
+                        if year == 2006 and ave == "all":
+                            continue
+                        honda.flux(year, exp, solar=sol, mountain=False, season=None, averaged=ave)

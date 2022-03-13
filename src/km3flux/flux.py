@@ -135,19 +135,6 @@ class Honda(BaseFlux):
         self._datapath = basepath / "honda"
         self._years = [p.name for p in self._datapath.glob("????") if p.is_dir()]
 
-    @property
-    def experiments(self):
-        return sorted(list(self._experiments.keys()))
-
-    def experiment_abbr(self, experiment):
-        try:
-            return self._experiments[experiment]
-        except KeyError:
-            experiments = ", ".join(self.experiments)
-            raise KeyError(
-                f"The '{experiment}' is not in the list of available experiments: {experiments}"
-            )
-
     def flux(
         self, year, experiment, solar="min", mountain=False, season=None, averaged=None
     ):
@@ -218,8 +205,8 @@ class Honda(BaseFlux):
             filename += f"-sol{solar}"
         else:
             raise ValueError(
-                f"Unsupported solar parameter '{solar}'"
-                "plase use either 'min' or 'max'."
+                f"Unsupported solar parameter '{solar}' "
+                "please use either 'min' or 'max'."
             )
 
         if year <= 2011:
@@ -250,6 +237,21 @@ class Honda(BaseFlux):
         filename += ".d.gz"
         filepath = self._datapath / str(year) / filename
         return filepath
+
+    @property
+    def experiments(self):
+        """Return a list of supported experiments."""
+        return sorted(list(self._experiments.keys()))
+
+    def experiment_abbr(self, experiment):
+        """Return the abbreviation used in filenames for a given experiment."""
+        try:
+            return self._experiments[experiment]
+        except KeyError:
+            experiments = ", ".join(self.experiments)
+            raise KeyError(
+                f"The '{experiment}' is not in the list of available experiments: {experiments}"
+            )
 
 
 class Honda2015(BaseFlux):
