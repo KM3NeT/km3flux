@@ -1,5 +1,6 @@
 """Assorted Fluxes, in  (m^2 sec sr GeV)^-1"""
 
+from glob import glob
 import logging
 from six import string_types
 
@@ -9,25 +10,8 @@ import pandas as pd
 from scipy.integrate import romberg, simps
 from scipy.interpolate import splrep, splev, RectBivariateSpline
 
-from km3flux.data import (
-    pdg2name,
-    name2pdg,
-    HONDAFILE,
-    DM_GC_FLAVORS,
-    DM_GC_CHANNELS,  # noqa
-    DM_GC_MASSES,
-    DM_GC_FILE,
-    WIMPSIM_FILE,
-    WIMPSIM_FLAVORS,
-    WIMPSIM_INTERESTING_CHANNELS,
-    WIMPSIM_MASSES,
-    DM_SUN_CHAN_TRANS_INV,
-    # dm_gc_spectrum, dm_sun_spectrum,
-    # DM_SUN_FLAVORS, DM_SUN_CHANNELS, DM_SUN_MASSES
-)
+from km3flux.data import basepath
 
-FLAVORS = ("nu_e", "anu_e", "nu_mu", "anu_mu")
-MCTYPES = [name2pdg(name) for name in FLAVORS]
 
 logger = logging.getLogger(__name__)
 
@@ -131,6 +115,131 @@ class PowerlawFlux(BaseFlux):
         num = np.power(emax, 1 - self.gamma) - np.power(emin, 1 - self.gamma)
         den = 1.0 - self.gamma
         return self.scale * (num / den)
+
+
+class Honda(BaseFlux):
+    _experiments = {
+        "Frejus": "frj",
+        "Gran Sasso": "grn",
+        "Homestake": "hms",
+        "INO": "ino",
+        "JUNO": "juno",
+        "Kamioka": "kam",
+        "Pythasalmi": "pyh",
+        "Soudan Mine": "sdn",
+        "South Pole": "spl",
+        "Sudbury": "sno",
+    }
+
+    def __init__(self):
+        self._datapath = basepath / "honda"
+        self._years = [p.name for p in self._datapath.glob("????") if p.is_dir()]
+
+    @property
+    def experiments(self):
+        return sorted(list(self._experiments.keys()))
+
+    def experiment_abbr(self, experiment):
+        try:
+            return self._experiments[experiment]
+        except KeyError:
+            experiments = ", ".join(self.experiments)
+            raise KeyError(
+                f"The '{experiment}' is not in the list of available experiments: {experiments}"
+            )
+
+    def flux(
+        self, year, experiment, solar="min", mountain=False, season=None, averaged=None
+    ):
+        """
+        Return the flux for a given year and experiment.
+
+        Parameters
+        ----------
+        year : int
+            The year of the publication.
+        experiment : str
+            The experiment name, can be one of the following:
+            "Kamioka", "Gran Sasso", "Sudbury", "Frejus", "INO", "South Pole",
+            "Pythasalmi", "Homestake", "JUNO"
+        solar : str (optional)
+            The solar parameter, can be "min" or "max". Default is "min" for Solar
+            minimum.
+        mountain : bool (optional)
+            With or without mountain over the detector. Default is "False" => without.
+        season : None or (int, int) (optional)
+            The season of interest. If `None`, the dataset for the full period is taken.
+            If a tuple is provided, the first entry is the starting and the last the
+            ending month. Notice that the corresponding dataset might not be available.
+        averaged : None or str (optional)
+            The type of averaging. Default is `None`. Also available are "all" for all
+            direction averaging and "azimuth" for azimuth averaging only.
+        """
+        filepath = self._filepath_for(
+            year, experiment, solar, mountain, season, averaged
+        )
+
+    def _filepath_for(self, year, experiment, solar, mountain, season, averaged):
+        exp = self.experiment_abbr(experiment)
+        filename = exp
+
+        if year >= 2014:  # seasonal data was added in 2014
+            if season is None:
+                filename += "-ally"
+            else:
+                filename += f"-{season[0]:02d}{season[1]:02d}"
+
+            if averaged is None:
+                filename += "-20-12"
+            elif averaged == "azimuth":
+                filename += "-20-01"
+            elif averaged == "all":
+                filename += "-01-01"
+            else:
+                raise ValueError(
+                    f"Unsupported averageing '{averaged}', "
+                    "please use `None`, 'all', or 'azimuth'."
+                )
+
+            if mountain:
+                filename += "-mtn"
+
+        if solar in ("min", "max"):
+            filename += f"-sol{solar}"
+        else:
+            raise ValueError(
+                f"Unsupported solar parameter '{solar}'"
+                "plase use either 'min' or 'max'."
+            )
+
+        if year <= 2011:
+            if season:
+                raise ValueError(
+                    "No seasonal tables available for year 2011 and earlier."
+                )
+
+            if mountain:
+                if averaged == "all":
+                    raise ValueError(
+                        "No published mountain data for all directions averaged."
+                    )
+                filename += "-mountain"
+
+            if averaged is None:
+                filename += ""
+            elif averaged == "azimuth":
+                filename += "-aa"
+            elif averaged == "all":
+                filename += "-alldir"
+            else:
+                raise ValueError(
+                    f"Unsupported averageing '{averaged}', "
+                    "please use `None`, 'all', or 'azimuth'."
+                )
+
+        filename += ".d.gz"
+        filepath = self._datapath / str(year) / filename
+        return filepath
 
 
 class Honda2015(BaseFlux):
@@ -244,103 +353,6 @@ class HondaSarcevic(BaseFlux):
         return fluxtable[zen_bin, ene_bin]
 
 
-class DarkMatterFlux(BaseFlux):
-    """
-    Get Dark Matter WimpWimp->foo->nu spectra.
-
-    Units are ``d/d n_particles / cm^2 sec sr``.
-
-    >>> from km3flux import DarkMatterFlux
-    >>> flux = DarkMatterFlux('anu_mu')
-    >>> flux(ene)
-    array([  6.68440000e+01,   1.83370000e+01,   4.96390000e+00,
-         1.61780000e+00,   5.05350000e-01,   2.29920000e-01,
-         2.34160000e-02,   2.99460000e-03,   3.77690000e-04,
-         6.87310000e-05,   1.42550000e-05])
-
-    Methods
-    =======
-    __init__(source='gc', flavor='nu_mu', channel='w', mass=1000)
-        Load flux table for the given neutrino flavor.
-    __call__(energy, zenith=None, interpolate=True)
-        Return the flux on energy, optionally on zenith.
-    integrate(zenith=None, emin=1, emax=100, **integargs)
-        Integrate the flux via romberg integration.
-    integrate_samples(energy, zenith=None, emin=1, emax=100)
-        Integrate the flux from given samples, via simpson integration.
-
-    Example
-    =======
-    >>> from km3flux import DarkMatterFlux
-    >>> print(DarkMatterFlux.flavors)
-    >>> flux = DarkMatterFlux(flavor='anu_mu', channel='w', mass=1000)
-    >>> ene = np.geomspace(1, 100, 11)
-    >>> print(flux(ene, interpolate=True))
-    """
-
-    flavors = DM_GC_FLAVORS
-    channels = DM_GC_CHANNELS
-    masses = DM_GC_MASSES
-
-    def __init__(self, source="gc", flavor="nu_mu", channel="w", mass=1000):
-        """
-        Parameters
-        ==========
-        source: string, optional [default: 'gc']
-            Object where the WimpWimp annihilates. Currently only 'gc'
-        flavor: string, optional [default: 'nu_mu']
-            Neutrino flavor. See available flavors stored in
-            ``DarkMatterFlux.flavors``
-        channel: string, optional [default: 'w']
-            WimpWimp annihilation channel (WimpWimp -> foofoo).
-            See available channels stored in ``DarkMatterFlux.channels``
-        mass: int, optional [default: 1000]
-            WimpWimp parent mass.
-            See available masses stored in ``DarkMatterFlux.masses``
-        """
-        if source == "gc":
-            fname = DM_GC_FILE
-        else:
-            raise NotImplementedError("Only GC supported so far!")
-        self.mass = mass
-        self.channel = channel
-        self.flavor = flavor
-
-        tab = pd.read_hdf(fname, "data")
-        tab = tab[(tab.flavor == flavor) & (tab.mass_dm == mass)]
-        self.flux = tab[channel].values
-        self.x_energy = tab["energy"]
-        self.avinterpol = splrep(
-            self.x_energy,
-            self.flux,
-        )
-
-    @property
-    def points(self):
-        return self.x_energy, self.flux
-
-    def _check_energy(self, ene, epsilon=0.0001):
-        if np.any(ene > self.mass + epsilon):
-            raise ValueError("Energies exceed parent mass!")
-        return ene
-
-    def __call__(self, energy, interpolate=True):
-        energy = np.atleast_1d(energy)
-        energy = self._check_energy(energy)
-        flux = splev(energy, self.avinterpol)
-        return flux
-
-    def _averaged(self, *args, **kwargs):
-        return self(*args, **kwargs)
-
-    def _with_zenith(self, energy, zenith, interpolate=True):
-        logger.debug("Interpolate? {}".format(interpolate))
-        logging.warning(
-            "No zenith dependent flux implemented! " "Falling back to averaged flux."
-        )
-        return self._averaged(self, energy)
-
-
 class AllFlavorFlux:
     """Get mixed-flavor fluxes.
 
@@ -385,96 +397,6 @@ class AllFlavorFlux:
             )
             out[where] = flux
         return out
-
-
-class WimpSimFlux(BaseFlux):
-    """WimpSim neutrino flux from Sun.
-
-    http://wimpsim.astroparticle.se/data.html
-
-    `z: nu mass / wimp mass`
-
-    `theta: angle towards center of sun`
-
-    `z=E_nu/m_WIMP`
-
-    2d layout: `d^2N/dz dtheta`
-
-    1d: `dN/dz`
-
-    Neutrinos at detector (icecube), the units are `cm^-2 annihilation^-1`.
-
-    we-res-jan2013-data.tar.gz
-
-    All energies in GeV.
-    """
-
-    def __init__(self, filename=None):
-        if filename is None:
-            filename = WIMPSIM_FILE
-        self.tab = pd.read_hdf(filename, "/flat")
-
-    @property
-    def points(self):
-        return self.x_energy, self.dnde
-
-    def _check_energy(self, ene, epsilon=0.0001):
-        if np.any(ene > self.mass + epsilon):
-            raise ValueError("Energies exceed parent mass!")
-        return ene
-
-    def __call__(
-        self,
-        energy,
-        interpolate=True,
-        flavor="nu_mu",
-        mass=1000.0,
-        channel="w",
-    ):
-        self.mass = mass
-        chan_num = int(DM_SUN_CHAN_TRANS_INV[channel])
-        tab = self.tab[
-            (self.tab.chan_num == chan_num) & (np.isclose(self.tab.mass, mass))
-        ]
-        dnde = tab[flavor]
-        self.x_energy = tab["energy"]
-        self.avinterpol = splrep(
-            self.x_energy,
-            dnde,
-        )
-        energy = np.atleast_1d(energy)
-        energy = self._check_energy(energy)
-        dnde = splev(energy, self.avinterpol)
-        return self.dnde2flux(dnde, self.mass)
-
-    def _averaged(self, *args, **kwargs):
-        return self(*args, **kwargs)
-
-    def _with_zenith(self, energy, zenith, interpolate=True):
-        raise NotImplementedError
-
-    @staticmethod
-    def dnde2flux(dnde, mass):
-        """Expects Neutrinos at detector,
-
-        Input units are `cm^-2 annihilation^-1`.
-
-        Output is / (m^2 sec sr GeV)
-        """
-        # dN/dz comes out of WS
-        # y = dN/dz = MDM * (dN/dE)
-        # gamm = (1e14/sec) * (100GeV/m_dm)^2 * (4*pi*r_suntoearth)
-        # -> [GeV m^2 sr s/yr]
-        # geom fact in wimpsim = 1/(4pi * r_sun_to_earth)
-        # -> geom fact already included (if using "yields at detector" table)
-        # -> gamma = 1e14 * (100/m)^2
-        # i don't get the 1e9 ???
-        # bah whatever
-        flux = (dnde / mass) * 1e14 * 1e9 * np.square(100 / mass)
-        flux *= 1e4  # cm2 -> m2
-        # gseagen:
-        # pointsource, so the I_0 = 1 (no 1/sr)
-        return flux
 
 
 def add_honda(df):
