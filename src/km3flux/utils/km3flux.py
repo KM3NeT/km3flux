@@ -50,11 +50,12 @@ def get_honda(include_seasonal=False, include_production_height=False, overwrite
         if not overwrite and os.path.exists(target_path):
             return
         os.makedirs(target_path.parent, exist_ok=True)
-        with open(target_path, "wb") as fobj:
-            r = requests.get(url)
-            if not r.ok:
-                log.error("Unable to retrieve '%s', reason: '%s' (status code %d)", url, r.reason, r.status_code)
-            fobj.write(r.content)
+        r = requests.get(url)
+        if not r.ok:
+            log.error("Unable to retrieve '%s', reason: '%s' (status code %d)", url, r.reason, r.status_code)
+        else:
+            with open(target_path, "wb") as fobj:
+                fobj.write(r.content)
 
     def get_all_data(url, year, overwrite=False, label=""):
         """Downloads all the datafiles from a given `url`"""

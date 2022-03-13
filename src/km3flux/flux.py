@@ -1,10 +1,8 @@
 """Assorted Fluxes, in  (m^2 sec sr GeV)^-1"""
 
-from glob import glob
+import gzip
 import logging
-from six import string_types
 
-import h5py
 import numpy as np
 import pandas as pd
 from scipy.integrate import romberg, simps
@@ -117,6 +115,26 @@ class PowerlawFlux(BaseFlux):
         return self.scale * (num / den)
 
 
+class IsotropicFlux:
+    def __init__(self, data):
+        self.data = data
+
+    @classmethod
+    def from_hondafile(cls, filepath):
+        print(filepath)
+        with gzip.open(filepath, "r") as fobj:
+            data = np.recfromcsv(
+                fobj,
+                names=["energy", "numu", "anumu", "nue", "anue"],
+                skip_header=2,
+                delimiter=" ",
+            )
+            return cls(data)
+
+    def __call__(self, energy):
+        pass
+
+
 class Honda(BaseFlux):
     _experiments = {
         "Frejus": "frj",
@@ -171,6 +189,9 @@ class Honda(BaseFlux):
                 "Try running `km3flux update` (see `km3flux -h` for more information) and "
                 "also make sure the requested combination of parameters is available."
             )
+
+        if averaged == "all":
+            return IsotropicFlux.from_hondafile(filepath)
 
     def _filepath_for(self, year, experiment, solar, mountain, season, averaged):
         """Generate the filename and path according to the naming conventions of Honda
