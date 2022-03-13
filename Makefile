@@ -39,7 +39,7 @@ dependencies:
 
 .PHONY: black
 black:
-	black --exclude '/_definitions/|version.py' $(PKGNAME)
+	black --exclude 'version.py' src/$(PKGNAME)
 	black examples
 	black tests
 	black doc/conf.py
