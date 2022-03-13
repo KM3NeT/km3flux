@@ -1,0 +1,96 @@
+#!/usr/bin/env python3
+"""
+Updates the files in the data folder by scraping the publications.
+Existing data files are not re-downloaded.
+
+Usage:
+    km3flux [-xs] update
+    km3flux show
+    km3flux (-h | --help)
+    km3flux --version
+
+Options:
+    -x    Overwrite existing files when updating.
+    -s    Include seasonal data from Honda when updating.
+    -h    Show this screen.
+    -v    Show the version.
+
+Currently only the Honda fluxes are download from
+https://www.icrr.u-tokyo.ac.jp/~mhonda/
+"""
+import os
+import re
+from urllib.parse import urljoin
+import requests
+
+from docopt import docopt
+from tqdm import tqdm
+from bs4 import BeautifulSoup
+
+import km3flux
+from km3flux.data import basepath
+
+URL = "https://www.icrr.u-tokyo.ac.jp/~mhonda/"
+
+
+def get_honda(include_seasonal=False, overwrite=False):
+    """Grab all the Honda fluxes"""
+
+    def archive_data(url, year, overwrite=False):
+        """Archives a file from `url` under `year`.
+
+        Currently, only Honda files are downloaded so there is no logic in place
+        to manage multiple download target locations. Therefore "honda/" is
+        hard-coded.
+        """
+        target_path = basepath / "honda" / year / os.path.basename(url)
+        if not overwrite and os.path.exists(target_path):
+            return
+        os.makedirs(target_path.parent, exist_ok=True)
+        with open(target_path, "wb") as fobj:
+            r = requests.get(url)
+            fobj.write(r.content)
+
+    def get_all_data(url, year, overwrite=False):
+        """Downloads all the datafiles from a given `url`"""
+        p = requests.get(url)
+        s = BeautifulSoup(p.content, "html.parser")
+        hrefs = [a["href"] for a in s.find_all("a") if a["href"].endswith(".d.gz")]
+        for href in tqdm(hrefs):
+            data_url = urljoin(p.url, href)
+            archive_data(data_url, year, overwrite)
+
+    print("Updating Honda fluxes...")
+    page = requests.get(URL)
+    soup = BeautifulSoup(page.content, "html.parser")
+
+    for e in soup.find_all("a"):
+        # yearly datasets
+        m = re.search(r"(nflx(\d{4})/index.html)", e.attrs["href"])
+        if m:
+            suburl, year = m.groups()
+            print(f"  year {year}")
+            get_all_data(urljoin(page.url, suburl), year, overwrite)
+
+            if include_seasonal:
+                p = requests.get(urljoin(page.url, suburl))
+                s = BeautifulSoup(p.content, "html.parser")
+                links = s.find_all("a")
+                for _e in links:
+                    ms = re.search(r"index-\d{4}.html", _e.attrs["href"])
+                    if ms:
+                        suburl = urljoin(p.url, _e.attrs["href"])
+                        get_all_data(suburl, year, overwrite)
+
+
+def main():
+    args = docopt(__doc__, version=km3flux.version)
+
+    overwrite = args["-x"]
+    include_seasonal = args["-s"]
+
+    get_honda(include_seasonal, overwrite)
+
+
+if __name__ == "__main__":
+    main()
