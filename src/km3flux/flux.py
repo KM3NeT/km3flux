@@ -178,8 +178,18 @@ class Honda(BaseFlux):
         filepath = self._filepath_for(
             year, experiment, solar, mountain, season, averaged
         )
+        if not filepath.exists():
+            raise FileNotFoundError(
+                f"The requested data file {filepath} could not be found in the archive. "
+                "Try running `km3flux update` (see `km3flux -h` for more information) and "
+                "also make sure the requested combination of parameters is available."
+            )
 
     def _filepath_for(self, year, experiment, solar, mountain, season, averaged):
+        """Generate the filename and path according to the naming conventions of Honda
+
+        Does some sanity checks too.
+        """
         exp = self.experiment_abbr(experiment)
         filename = exp
 
