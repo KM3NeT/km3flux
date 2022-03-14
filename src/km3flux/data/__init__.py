@@ -2,10 +2,10 @@
 from pathlib import Path
 import sys
 
-if sys.version_info < (3, 7):
+if sys.version_info < (3, 9):
     import importlib_resources as resources
 else:
-    import importlib.resources as resources
+    from importlib import resources
 
 
 basepath = Path(resources.files(__name__))
