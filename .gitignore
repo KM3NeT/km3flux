@@ -38,7 +38,7 @@ doc/api
 .pytest_cache/
 junit.xml
 .mypy_cache
-src/km3flux/data
+*.d.gz
 
 # Version info
 src/km3flux/version.py
