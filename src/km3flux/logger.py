@@ -200,4 +200,3 @@ if supports_color():
 
 log = get_logger("km3flux")
 set_level(log, "WARNING")
-

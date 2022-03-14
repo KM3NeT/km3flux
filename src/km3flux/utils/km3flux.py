@@ -52,7 +52,12 @@ def get_honda(include_seasonal=False, include_production_height=False, overwrite
         os.makedirs(target_path.parent, exist_ok=True)
         r = requests.get(url)
         if not r.ok:
-            log.error("Unable to retrieve '%s', reason: '%s' (status code %d)", url, r.reason, r.status_code)
+            log.error(
+                "Unable to retrieve '%s', reason: '%s' (status code %d)",
+                url,
+                r.reason,
+                r.status_code,
+            )
         else:
             with open(target_path, "wb") as fobj:
                 fobj.write(r.content)
