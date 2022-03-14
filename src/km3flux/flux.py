@@ -4,7 +4,6 @@ import gzip
 import logging
 
 import numpy as np
-import pandas as pd
 import scipy.interpolate
 from scipy.integrate import romberg, simps
 from scipy.interpolate import splrep, splev, RectBivariateSpline
