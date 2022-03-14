@@ -31,6 +31,7 @@ try:
 except ModuleNotFoundError:
     print("Install the optional dependencies to be able to manage the archive:\n\n"
           "    pip install 'km3flux[all]'\n")
+    exit(1)
 
 import km3flux
 from km3flux.data import basepath
