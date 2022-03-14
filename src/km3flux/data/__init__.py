@@ -2,7 +2,7 @@
 from pathlib import Path
 import sys
 
-if sys.version_info < (3, 9):
+if sys.version_info < (3, 7):
     import importlib_resources as resources
 else:
     import importlib.resources as resources
