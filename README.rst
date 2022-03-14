@@ -16,23 +16,13 @@ The km3flux Python package
 About
 =====
 
-KM3Flux is a collection of neutrino flux models + assorted utilities for
-computing event weights.
+KM3Flux is a collection of neutrino flux models + assorted utilities to
+deal with them.
 
 Install
 =======
 
-This is developed on python 3.6. Lower versions (especially py2)
-might or might not work.
-
-Install the dependencies
-
-- numpy 
-- pandas
-- h5py
-- pytables 
-
-In your python env, do::
+You need Python 3.6+. In your python env, do::
 
     pip install km3flux
 

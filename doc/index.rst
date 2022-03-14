@@ -1,43 +1,29 @@
-.. KM3Flux documentation master file
+.. km3flux documentation master file, created by
+   sphinx-quickstart on Fri Nov  1 14:27:13 2019.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
 
-KM3Flux
-=======
+.. include:: ../README.rst
 
-.. image:: https://readthedocs.org/projects/km3flux/badge/?version=latest
-
-KM3Flux is a collection of neutrino flux models + assorted utilities for
-computing event weights.
-
-Install
--------
-
-This is developed on python 3.6. Lower versions (especially py2)
-might or might not work.
-
-Install the dependencies
-
-* numpy 
-* pandas
-* h5py
-* pytables 
-
-In your python env, do
-
-  pip install km3flux
-
-Contents
---------
 
 .. toctree::
-    :hidden:
-    :titlesonly:
+   :maxdepth: 2
+   :caption: Contents:
 
-    self
+   examples
+   contribute
+   changelog
 
-.. toctree::
-    :maxdepth: 2
-    
-    examples
-    api
+   autoapi/index
+
+   Code Coverage <http://km3py.pages.km3net.de/km3flux/coverage>
+   Source (Git) <https://git.km3net.de/km3py/km3flux.git>
+
+
+
+Indices and tables
+==================
 
 * :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
