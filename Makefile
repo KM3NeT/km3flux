@@ -47,7 +47,7 @@ black:
 
 .PHONY: black-check
 black-check:
-	black --check --exclude '/_definitions/|version.py' $(PKGNAME)
+	black --check --exclude '/_definitions/|version.py' src/$(PKGNAME)
 	black --check examples
 	black --check tests
 	black --check doc/conf.py
