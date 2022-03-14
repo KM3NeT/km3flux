@@ -22,11 +22,15 @@ https://www.icrr.u-tokyo.ac.jp/~mhonda/
 import os
 import re
 from urllib.parse import urljoin
-import requests
 
-from docopt import docopt
-from tqdm import tqdm
-from bs4 import BeautifulSoup
+try:
+    import requests
+    from bs4 import BeautifulSoup
+    from docopt import docopt
+    from tqdm import tqdm
+except ModuleNotFoundError:
+    print("Install the optional dependencies to be able to manage the archive:\n\n"
+          "    pip install 'km3flux[all]'\n")
 
 import km3flux
 from km3flux.data import basepath
