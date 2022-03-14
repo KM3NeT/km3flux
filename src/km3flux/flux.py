@@ -5,6 +5,7 @@ import logging
 
 import numpy as np
 import pandas as pd
+import scipy.interpolate
 from scipy.integrate import romberg, simps
 from scipy.interpolate import splrep, splev, RectBivariateSpline
 
@@ -116,20 +117,35 @@ class PowerlawFlux(BaseFlux):
 
 
 class IsotropicFlux:
-    def __init__(self, data):
-        self.data = data
+    def __init__(self, data, flavors):
+        self._data = data
+        self._flavors = flavors
+        for flavor in flavors:
+            flux = scipy.interpolate.InterpolatedUnivariateSpline(
+                data.energy, data[flavor]
+            )
+            setattr(self, flavor, flux)
+
+    def __getitem__(self, flavor):
+        if flavor in self._flavors:
+            return getattr(self, flavor)
+        raise KeyError(
+            f"Flavor '{flavor}' not present in data. "
+            "Available flavors: {', '.join(self._flavors)}"
+        )
 
     @classmethod
     def from_hondafile(cls, filepath):
         print(filepath)
         with gzip.open(filepath, "r") as fobj:
+            flavors = ["numu", "anumu", "nue", "anue"]
             data = np.recfromcsv(
                 fobj,
-                names=["energy", "numu", "anumu", "nue", "anue"],
+                names=["energy"] + flavors,
                 skip_header=2,
                 delimiter=" ",
             )
-            return cls(data)
+            return cls(data, flavors)
 
     def __call__(self, energy):
         pass
@@ -148,10 +164,10 @@ class Honda(BaseFlux):
         "South Pole": "spl",
         "Sudbury": "sno",
     }
+    _datapath = basepath / "honda"
 
-    def __init__(self):
-        self._datapath = basepath / "honda"
-        self._years = [p.name for p in self._datapath.glob("????") if p.is_dir()]
+    #    def __init__(self):
+    #        self._years = [p.name for p in self._datapath.glob("????") if p.is_dir()]
 
     def flux(
         self, year, experiment, solar="min", mountain=False, season=None, averaged=None
