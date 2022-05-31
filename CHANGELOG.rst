@@ -4,6 +4,10 @@ Changelog
 Unreleased Changes
 ------------------
 
+1.0.1 (2022-05-31)
+------------------
+* last minor release before the next breaking release
+
 1.0 (2020-04-17)
 ----------------
 * version jump to 1.0 to clean up the versioning mess, starting over...
