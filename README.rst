@@ -7,33 +7,48 @@ The km3flux Python package
 .. image:: https://git.km3net.de/km3py/km3flux/badges/master/coverage.svg
     :target: https://km3py.pages.km3net.de/km3flux/coverage
 
-.. image:: https://api.codacy.com/project/badge/Grade/0660338483874475ba04f324de2123ec
-    :target: https://www.codacy.com/manual/tamasgal/km3flux?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=KM3NeT/km3flux&amp;utm_campaign=Badge_Grade
-
 .. image:: https://git.km3net.de/examples/km3badges/-/raw/master/docs-latest-brightgreen.svg
     :target: https://km3py.pages.km3net.de/km3flux
 
 About
 =====
 
-KM3Flux is a collection of neutrino flux models + assorted utilities for
-computing event weights.
+KM3Flux is a collection of neutrino flux models + assorted utilities to
+deal with them.
 
 Install
 =======
 
-This is developed on python 3.6. Lower versions (especially py2)
-might or might not work.
-
-Install the dependencies
-
-- numpy 
-- pandas
-- h5py
-- pytables 
-
-In your python env, do::
+You need Python 3.6+. In your python env, do::
 
     pip install km3flux
 
 or just clone the git repository and install via ``pip install .``
+
+Update or download flux data
+============================
+
+The command-line tool ``km3flux`` can be used to manage the flux data which
+is stored in an offline archive::
+
+    $ km3flux -h
+    Updates the files in the data folder by scraping the publications.
+    Existing data files are not re-downloaded.
+
+    Usage:
+        km3flux [-spx] update
+        km3flux (-h | --help)
+        km3flux --version
+
+    Options:
+        -x    Overwrite existing files when updating.
+        -s    Include seasonal flux data from Honda.
+        -p    Include production height tables from Honda.
+        -h    Show this screen.
+        -v    Show the version.
+
+    Currently only the Honda fluxes are download from
+    https://www.icrr.u-tokyo.ac.jp/~mhonda/
+
+Beware that the 2011 dataset is currently not available on the website,
+so you will see some errors when trying to download them.

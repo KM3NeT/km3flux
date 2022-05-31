@@ -8,7 +8,6 @@ variables:
 cache:
   paths:
     - .cache/pip
-    - venv/
   key: "$CI_COMMIT_REF_SLUG"
 
 stages:
@@ -21,7 +20,7 @@ stages:
   python -V
   python3 -m venv venv
   source venv/bin/activate
-  pip install -U pip setuptools wheel
+  pip install -U pip setuptools wheel setuptools_scm
   hash -r
   pip freeze
   make install-dev
@@ -109,7 +108,7 @@ pypi:
     stage: release
     cache: {}
     script:
-        - pip install -U twine wheel
+        - pip install -U twine wheel setuptools_scm
         - python setup.py sdist
         - python setup.py bdist_wheel
         - twine upload dist/*

@@ -17,7 +17,7 @@ test:
 	py.test --junitxml=./reports/junit.xml -o junit_suite_name=$(PKGNAME) tests
 
 test-cov:
-	py.test --cov ./$(PKGNAME) --cov-report term-missing --cov-report xml:reports/coverage.xml --cov-report html:reports/coverage tests
+	py.test --cov src/$(PKGNAME) --cov-report term-missing --cov-report xml:reports/coverage.xml --cov-report html:reports/coverage tests
 
 test-loop:
 	py.test tests
@@ -34,12 +34,9 @@ docstyle:
 lint:
 	py.test --pylint
 
-dependencies:
-	pip install -Ur requirements.txt
-
 .PHONY: black
 black:
-	black --exclude '/_definitions/|version.py' $(PKGNAME)
+	black --exclude 'version.py' src/$(PKGNAME)
 	black examples
 	black tests
 	black doc/conf.py
@@ -47,11 +44,11 @@ black:
 
 .PHONY: black-check
 black-check:
-	black --check --exclude '/_definitions/|version.py' $(PKGNAME)
+	black --check --exclude '/_definitions/|version.py' src/$(PKGNAME)
 	black --check examples
 	black --check tests
 	black --check doc/conf.py
 	black --check setup.py
 
 
-.PHONY: all clean install install-dev test  test-nocov flake8 pep8 dependencies docstyle black black-check
+.PHONY: all clean install install-dev test  test-nocov flake8 pep8 docstyle black black-check

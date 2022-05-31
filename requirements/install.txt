@@ -1,8 +1,0 @@
-docopt
-h5py
-matplotlib>=2.0
-mock
-numpy
-pandas
-scipy
-tables

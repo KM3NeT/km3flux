@@ -24,8 +24,8 @@ from pkg_resources import get_distribution
 version = get_distribution("km3flux").version
 short_version = ".".join(version.split(".")[:2])
 project = "km3flux {}".format(short_version)
-copyright = "{0}, Moritz Lotze".format(date.today().year)
-author = "Moritz Lotze"
+copyright = "{0}, Tamas Gal and Moritz Lotze".format(date.today().year)
+author = "Tamas Gal and Moritz Lotze"
 
 # -- General configuration ---------------------------------------------------
 
@@ -51,22 +51,17 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # AutoAPI
 autoapi_type = "python"
-autoapi_dirs = ["../km3flux"]
+autoapi_dirs = ["../src/km3flux"]
 autoapi_options = ["members", "undoc-members", "show-module-summary"]
 autoapi_include_summaries = True
 
 # Gallery
 sphinx_gallery_conf = {
     "backreferences_dir": "modules/generated",
-    "abort_on_example_error": True,
     "default_thumb_file": "_static/default_gallery_thumbnail.png",
     "examples_dirs": "../examples",  # path to your example scripts
     "gallery_dirs": "auto_examples",  # path to where to save gallery generated output
-    "show_memory": False,
-    "reference_url": {
-        "km3astro": None,
-        "numpy": "http://docs.scipy.org/doc/numpy",
-    },
+    "show_memory": True,
 }
 
 # -- Options for HTML output -------------------------------------------------
