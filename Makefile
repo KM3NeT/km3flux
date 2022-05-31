@@ -34,9 +34,6 @@ docstyle:
 lint:
 	py.test --pylint
 
-dependencies:
-	pip install -Ur requirements.txt
-
 .PHONY: black
 black:
 	black --exclude 'version.py' src/$(PKGNAME)
@@ -54,4 +51,4 @@ black-check:
 	black --check setup.py
 
 
-.PHONY: all clean install install-dev test  test-nocov flake8 pep8 dependencies docstyle black black-check
+.PHONY: all clean install install-dev test  test-nocov flake8 pep8 docstyle black black-check
