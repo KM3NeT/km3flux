@@ -24,7 +24,7 @@ fig, ax = matplotlib.pyplot.subplots()
 
 energies = np.logspace(-1, 4, 200)
 
-colors = sns.color_palette('tab10')
+colors = sns.color_palette("tab10")
 
 for c, nu in zip(colors, ["numu", "nue", "anumu", "anue"]):
     ax.plot(f._data.energy, f._data[nu], c=c, label=nu, marker=",", ls="none")

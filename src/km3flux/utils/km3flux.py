@@ -29,8 +29,10 @@ try:
     from docopt import docopt
     from tqdm import tqdm
 except ModuleNotFoundError:
-    print("Install the optional dependencies to be able to manage the archive:\n\n"
-          "    pip install 'km3flux[all]'\n")
+    print(
+        "Install the optional dependencies to be able to manage the archive:\n\n"
+        "    pip install 'km3flux[all]'\n"
+    )
     exit(1)
 
 import km3flux
