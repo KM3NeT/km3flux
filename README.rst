@@ -14,16 +14,24 @@ About
 =====
 
 KM3Flux is a collection of neutrino flux models + assorted utilities to
-deal with them.
+deal with them. The current v2 is an alpha release.
 
 Install
 =======
 
 You need Python 3.6+. In your python env, do::
 
-    pip install km3flux
+    pip install "km3flux[all]==2.0.0a1"
 
 or just clone the git repository and install via ``pip install .``
+
+If you want to use the legacy version (without the command line tool), use
+
+    pip install km3flux==1.0.3
+
+At the moment, `pip install km3flux` will still download the latest v1, this will
+however change in future. Always make sure that you keep track of which version you
+use in your projects -- this is a general advice and not specific to `km3flux`!
 
 Update or download flux data
 ============================
