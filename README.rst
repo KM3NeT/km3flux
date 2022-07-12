@@ -25,7 +25,7 @@ You need Python 3.6+. In your python env, do::
 
 or just clone the git repository and install via ``pip install .``
 
-If you want to use the legacy version (without the command line tool), use
+If you want to use the legacy version (without the command line tool), use::
 
     pip install km3flux==1.0.3
 
