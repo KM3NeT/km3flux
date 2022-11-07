@@ -2,8 +2,12 @@
 
 import gzip
 import logging
+import io
+import re
 
 import numpy as np
+import numpy.lib.recfunctions as rfn
+
 import scipy.interpolate
 from scipy.integrate import romberg, simps
 from scipy.interpolate import splrep, splev, RectBivariateSpline
@@ -122,18 +126,174 @@ class IsotropicFlux:
             "Available flavors: {', '.join(self._flavors)}"
         )
 
+
+class HondaFlux:
+    """Base class for Honda fluxes
+
+    Methods
+    =======
+    make_regular_grid(axes_keys, flavor)
+        Create a n_dim grid based on data.
+    interpolation_method(axes_keys, flavor)
+        Select the interpolation method.
+    parse_categories(f)
+        Integrate the flux from given samples, via simpson integration.
+    """
+
+    def __init__(self, data, flavors):
+
+        # Add cosz and phi_az bin center
+        data = rfn.append_fields(
+            data, "cosz_mean", (data.cosz_min + data.cosz_max) / 2.0, dtypes=float
+        ).view(np.recarray)
+        data = rfn.append_fields(
+            data, "phi_az_mean", (data.phi_az_min + data.phi_az_max) / 2.0, dtypes=float
+        ).view(np.recarray)
+
+        self._flavors = flavors
+        self._data = data
+        self._axes = ["energy"]
+
+        # Check number of input dimensions
+        if len(np.unique(data.cosz_mean)) > 1:
+            self._axes.append("cosz_mean")
+        if len(np.unique(data.phi_az_mean)) > 1:
+            self._axes.append("phi_az_mean")
+
+        self._n_dim = len(self._axes)
+
+        # Set the interpolation method accordingly
+        for flavor in flavors:
+            flux = self.interpolation_method(self._axes, flavor)
+            setattr(self, flavor, flux)
+
+    def make_regular_grid(self, axes_keys, flavor):
+        """
+        Create a n_dim grid based on data.
+
+        Parameters
+        ----------
+        axes_keys : list of str
+            axes to be used, define dimensions order
+        flavor : str
+            column to use to fill the grid
+        """
+        axes = []
+        dim = []
+
+        for key in axes_keys:
+            r = np.sort(np.unique(self._data[key]))
+            axes.append(r)
+            dim.append(len(r))
+
+        self._data.sort(order=axes_keys)
+        grid = np.reshape(self._data[flavor], np.array(dim))
+        return grid, axes
+
+    def interpolation_method(self, axes_keys, flavor):
+        """
+        Select the interpolation method.
+
+        For 1D interpolation:
+        - InterpolatedUnivariateSpline
+        For 2D interpolation:
+        - RectBivariateSpline
+        For >= 3D interpolation:
+        - RegularGridInterpolator
+
+        Parameters
+        ----------
+        axes_keys : list of str
+            axes to be used, define dimensions order
+        flavor : str
+            column to use to fill the grid
+        """
+        if len(axes_keys) == 1:
+            return scipy.interpolate.InterpolatedUnivariateSpline(
+                self._data.energy, self._data[flavor]
+            )
+
+        elif len(axes_keys) == 2:
+            grid, axes = self.make_regular_grid(axes_keys, flavor)
+            return scipy.interpolate.RectBivariateSpline(*axes, grid).ev
+
+        else:
+            grid, axes = self.make_regular_grid(axes_keys, flavor)
+            flux = scipy.interpolate.RegularGridInterpolator(
+                axes, grid, bounds_error=False, fill_value=None
+            )
+
+            def columnar_interface(*args):
+                return flux(np.stack(args).T)
+
+            return columnar_interface
+
+    def __getitem__(self, flavor):
+        if flavor in self._flavors:
+            return getattr(self, flavor)
+        raise KeyError(
+            f"Flavor '{flavor}' not present in data. "
+            "Available flavors: {', '.join(self._flavors)}"
+        )
+
     @classmethod
     def from_hondafile(cls, filepath):
-        print(filepath)
+
         with gzip.open(filepath, "r") as fobj:
             flavors = ["numu", "anumu", "nue", "anue"]
-            data = np.recfromcsv(
-                fobj,
-                names=["energy"] + flavors,
-                skip_header=2,
-                delimiter=" ",
-            )
+
+            cats = cls.parse_categories(cls, fobj)
+
+            data = []
+            for header, content in cats:
+
+                # Split the header to get cosZ and phi_Az ranges (4 numbers)
+                header = " ".join(re.findall(r"[-+]?(?:\d*\.\d+|\d+)", header))
+                header_cols = ["cosz_min", "cosz_max", "phi_az_min", "phi_az_max"]
+
+                # Create a dummy file object from sub range content +
+                # additional columns for the cos Zenith and phi
+                # Azimuth
+                f = io.StringIO(header.join([""] + content))
+
+                # Create a recarray from the file
+                data_tmp = np.recfromcsv(
+                    f,
+                    names=header_cols + ["energy"] + flavors,
+                    skip_header=2,
+                    delimiter=" ",
+                )
+                data.append(data_tmp)
+
+            # Merge invidual rec arrays to one
+            data = rfn.stack_arrays(data, asrecarray=True, usemask=False)
+
             return cls(data, flavors)
+
+    def parse_categories(self, f):
+        """
+        Select the interpolation method.
+
+        Parameters
+        ----------
+        f : file object
+            Honda file to be parsed
+        """
+        cats = []
+        last_cat_start = -1
+        last_cat_header = ""
+        lines = []
+        for i, line in enumerate(f):
+            line = line.decode("ascii")
+            if bool(line.count("average flux in")):
+                if len(lines) != 0:
+                    cats.append((last_cat_header, lines))
+                    lines = []
+                last_cat_header = line
+            lines.append(line)
+        cats.append((last_cat_header, lines))
+        f.seek(0)
+        return cats
 
 
 class Honda:
@@ -191,8 +351,7 @@ class Honda:
                 "also make sure the requested combination of parameters is available."
             )
 
-        if averaged == "all":
-            return IsotropicFlux.from_hondafile(filepath)
+        return HondaFlux.from_hondafile(filepath)
 
     def _filepath_for(self, year, experiment, solar, mountain, season, averaged):
         """Generate the filename and path according to the naming conventions of Honda
