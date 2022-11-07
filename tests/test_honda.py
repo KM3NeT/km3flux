@@ -73,3 +73,35 @@ class TestHonda(unittest.TestCase):
         assert f._data.anumu[-1] == 6.1880e-11
         assert f._data.nue[-1] == 3.3895e-12
         assert f._data.anue[-1] == 2.4053e-12
+
+    def test_azimuth_averaged_honda(self):
+        honda = km3flux.flux.Honda()
+        f = honda.flux(2014, "Frejus", averaged="azimuth")
+        assert f._data.shape == (2020,)
+        print(f._data.dtype)
+        assert f._data.energy[0] == 1e-1
+        assert f._data.numu[0] == 7742.2
+        assert f._data.anumu[0] == 7828.5
+        assert f._data.nue[0] == 3855.7
+        assert f._data.anue[0] == 3584.9
+        assert f._data.energy[-1] == 1e4
+        assert f._data.numu[-1] == 4.5948e-11
+        assert f._data.anumu[-1] == 2.5223e-11
+        assert f._data.nue[-1] == 1.2619e-12
+        assert f._data.anue[-1] == 9.595e-13
+
+    def test_full_honda(self):
+        honda = km3flux.flux.Honda()
+        f = honda.flux(2014, "Frejus", averaged=None)
+        assert f._data.shape == (24240,)
+        print(f._data.dtype)
+        assert f._data.energy[0] == 0.1
+        assert f._data.numu[0] == 12145.0
+        assert f._data.anumu[0] == 12309.0
+        assert f._data.nue[0] == 6213.3
+        assert f._data.anue[0] == 5386.6
+        assert f._data.energy[-1] == 10000.0
+        assert f._data.numu[-1] == 4.5482e-11
+        assert f._data.anumu[-1] == 2.5984e-11
+        assert f._data.nue[-1] == 1.3208e-12
+        assert f._data.anue[-1] == 9.9251e-13
