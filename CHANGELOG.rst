@@ -3,6 +3,9 @@ Changelog
 
 Unreleased Changes
 ------------------
+2.0.0a2 (2022-12-19)
+--------------------
+* Pre-release with non-averaged Honda flux
 
 1.0.1 (2022-05-31)
 ------------------
