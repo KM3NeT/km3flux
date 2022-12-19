@@ -21,7 +21,7 @@ Install
 
 You need Python 3.6+. In your python env, do::
 
-    pip install "km3flux[all]==2.0.0a1"
+    pip install "km3flux[all]==2.0.0a2"
 
 or just clone the git repository and install via ``pip install .``
 
